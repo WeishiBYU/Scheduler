@@ -27,7 +27,7 @@ const Layout = ({ children }) => {
         <p>&copy; 2025 Carpet & Upholstery Cleaning Service</p>
         <div className="container-fluid">
           <span className="text-reset">Author Name(s)</span>
-          <a className="text-reset" href="https://github.com/webprogramming260/simon-css">Source</a>
+          <a className="text-reset" href="https://github.com/WeishiBYU/Scheduler/compare/New-Stuff?expand=1">Source</a>
         </div>
       </footer>
     </div>
