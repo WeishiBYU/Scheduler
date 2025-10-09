@@ -25,6 +25,10 @@ const Layout = ({ children }) => {
       
       <footer className="layout-footer">
         <p>&copy; 2025 Carpet & Upholstery Cleaning Service</p>
+        <div className="container-fluid">
+          <span className="text-reset">Author Name(s)</span>
+          <a className="text-reset" href="https://github.com/webprogramming260/simon-css">Source</a>
+        </div>
       </footer>
     </div>
   );
