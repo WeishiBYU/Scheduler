@@ -157,11 +157,85 @@ export const BookingProvider = ({ children }) => {
     return services;
   };
 
+  const calculateAdditionalServices = () => {
+    let additionalCost = 0;
+    
+    // Pre-vacuum pricing (needs to be calculated based on selected rooms)
+    if (customerInfo.preVacuum === 'pros-vacuum') {
+      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
+      const totalHalls = carpetServices.halls.cleaned + carpetServices.landings.cleaned;
+      const totalStaircases = carpetServices.staircases.cleaned;
+      
+      additionalCost += (totalRooms * 10) + (totalHalls * 5) + (totalStaircases * 20);
+    }
+    
+    // Odor treatment pricing
+    if (customerInfo.odorIssues === 'mild-odor') {
+      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
+      if (totalRooms <= 2) {
+        additionalCost += 25;
+      } else {
+        additionalCost += 25 + ((totalRooms - 2) * 10);
+      }
+    } else if (customerInfo.odorIssues === 'heavy-odor') {
+      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
+      if (totalRooms <= 2) {
+        additionalCost += 50;
+      } else {
+        additionalCost += 50 + ((totalRooms - 2) * 30);
+      }
+    }
+    
+    // Pet urine areas pricing
+    if (customerInfo.petUrineAreas === '3-or-less-spots') {
+      additionalCost += 75;
+    } else if (customerInfo.petUrineAreas === '1-room') {
+      additionalCost += 50;
+    } else if (customerInfo.petUrineAreas === '2-rooms') {
+      additionalCost += 100;
+    } else if (customerInfo.petUrineAreas === '3-rooms') {
+      additionalCost += 150;
+    } else if (customerInfo.petUrineAreas === '4-rooms') {
+      additionalCost += 200;
+    }
+    
+    // Pet urine treatment pricing
+    if (customerInfo.petUrine === 'mild-odor') {
+      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
+      if (totalRooms <= 2) {
+        additionalCost += 25;
+      } else {
+        additionalCost += 25 + ((totalRooms - 2) * 10);
+      }
+    } else if (customerInfo.petUrine === 'heavy-odor') {
+      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
+      if (totalRooms <= 2) {
+        additionalCost += 50;
+      } else {
+        additionalCost += 50 + ((totalRooms - 2) * 30);
+      }
+    }
+    
+    // Stain treatment pricing
+    if (customerInfo.stains === '1-3-stains') {
+      additionalCost += 30;
+    } else if (customerInfo.stains === '4-6-stains') {
+      additionalCost += 60;
+    } else if (customerInfo.stains === '7-9-stains') {
+      additionalCost += 80;
+    }
+    
+    return additionalCost;
+  };
+
   const calculateTotalPrice = () => {
-    const total = getSelectedServices().reduce((total, service) => total + service.price, 0);
+    const baseTotal = getSelectedServices().reduce((total, service) => total + service.price, 0);
+    const additionalTotal = calculateAdditionalServices();
+    const total = baseTotal + additionalTotal;
+    
     if (total < 250 && total !== 0) return 250; // Minimum charge
-    return total
-    };
+    return total;
+  };
 
   const value = {
     carpetServices,
@@ -169,6 +243,7 @@ export const BookingProvider = ({ children }) => {
     upholsteryServices,
     setUpholsteryServices,
     getSelectedServices,
+    calculateAdditionalServices,
     calculateTotalPrice,
     pricing,
     // Customer Information

@@ -3,8 +3,9 @@ import { useBooking } from '../../contexts/BookingContext';
 import './PriceTracker.css';
 
 const PriceTracker = () => {
-  const { getSelectedServices, calculateTotalPrice } = useBooking();
+  const { getSelectedServices, calculateAdditionalServices, calculateTotalPrice } = useBooking();
   const selectedServices = getSelectedServices();
+  const additionalCost = calculateAdditionalServices();
 
   return (
     <div className="price-tracker">
@@ -20,6 +21,13 @@ const PriceTracker = () => {
               <span className="service-price">${service.price.toFixed(2)}</span>
             </div>
           ))
+        )}
+        
+        {additionalCost > 0 && (
+          <div className="service-item additional-services">
+            <span className="service-name">Additional Services</span>
+            <span className="service-price">${additionalCost.toFixed(2)}</span>
+          </div>
         )}
       </div>
       

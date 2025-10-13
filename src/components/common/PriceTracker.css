@@ -56,3 +56,21 @@
   color: #6c757d;
   margin-top: 0.5rem;
 }
+
+.additional-services {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 0.75rem 0.5rem !important;
+  margin: 0.5rem 0;
+  border: 1px solid #dee2e6 !important;
+}
+
+.additional-services .service-name {
+  color: #495057;
+  font-weight: 600;
+}
+
+.additional-services .service-price {
+  color: #007bff;
+  font-weight: bold;
+}
