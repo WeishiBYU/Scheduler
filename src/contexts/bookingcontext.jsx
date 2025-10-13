@@ -26,6 +26,69 @@ export const BookingProvider = ({ children }) => {
     chairs: { cleaned: 0 }
   });
 
+  // Customer information state
+  const [customerInfo, setCustomerInfo] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    instructions: '',
+    presentForAppt: ''
+  });
+
+  // Scheduling state
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+
+  // Available time slots
+  const timeSlots = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
+
+  // Booked appointments (this would typically come from a database)
+  const [bookedAppointments, setBookedAppointments] = useState([
+    // Example booked slots - in real app this would come from your backend
+    { date: '2025-10-15', time: '9:00 AM' },
+    { date: '2025-10-15', time: '1:00 PM' },
+    { date: '2025-10-16', time: '11:00 AM' },
+  ]);
+
+  // Check if a date is available (not fully booked)
+  const isDateAvailable = (date) => {
+    const dateString = date.toISOString().split('T')[0];
+    const bookedSlotsForDate = bookedAppointments.filter(apt => apt.date === dateString);
+    return bookedSlotsForDate.length < timeSlots.length; // Not all slots are booked
+  };
+
+  // Check if a specific time slot is available
+  const isTimeSlotAvailable = (date, time) => {
+    if (!date) return false;
+    const dateString = date.toISOString().split('T')[0];
+    return !bookedAppointments.some(apt => apt.date === dateString && apt.time === time);
+  };
+
+  // Get available time slots for a specific date
+  const getAvailableTimeSlots = (date) => {
+    if (!date) return [];
+    return timeSlots.filter(time => isTimeSlotAvailable(date, time));
+  };
+
+  // Check if date should be disabled in calendar
+  const isDateDisabled = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Disable past dates
+    if (date < today) return true;
+    
+    // Disable Sundays (assuming you don't work Sundays)
+    if (date.getDay() === 0) return true;
+    
+    // Disable if no available slots
+    if (!isDateAvailable(date)) return true;
+    
+    return false;
+  };
+
   // Define pricing structure
   const pricing = {
     carpet: {
@@ -99,7 +162,21 @@ export const BookingProvider = ({ children }) => {
     setUpholsteryServices,
     getSelectedServices,
     calculateTotalPrice,
-    pricing
+    pricing,
+    // Customer Information
+    customerInfo,
+    setCustomerInfo,
+    // Scheduling
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    timeSlots,
+    isDateAvailable,
+    isTimeSlotAvailable,
+    getAvailableTimeSlots,
+    isDateDisabled,
+    bookedAppointments
   };
 
   return (

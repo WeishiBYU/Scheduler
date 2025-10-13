@@ -3,17 +3,69 @@
   margin-bottom: 0.5rem;
 }
 
-.calendar-placeholder {
-  background: #f8f9fa;
-  border: 2px dashed #dee2e6;
-  border-radius: 8px;
-  padding: 3rem;
-  text-align: center;
+.calendar-container {
   margin: 2rem 0;
-  color: #6c757d;
+  padding: 1.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
 }
 
-.time-slots-placeholder h3 {
+.calendar-container h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.booking-calendar {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  font-family: inherit;
+}
+
+.booking-calendar .react-calendar__tile {
+  padding: 0.75rem 0.5rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  color: #2c3e50;
+}
+
+.booking-calendar .react-calendar__tile:enabled:hover {
+  background-color: #e3f2fd;
+  border-color: #007bff;
+}
+
+.booking-calendar .react-calendar__tile--active {
+  background: #007bff !important;
+  color: white;
+}
+
+.booking-calendar .react-calendar__tile:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.selected-date {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  color: #007bff;
+  font-weight: 500;
+}
+
+.time-slots-container {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+}
+
+.time-slots-container h3 {
   color: #2c3e50;
   margin-bottom: 1rem;
 }
@@ -43,4 +95,35 @@
   border-color: #007bff;
   background-color: #007bff;
   color: white;
+}
+
+.time-instruction {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.no-slots {
+  color: #dc3545;
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
+
+.selected-time {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #d4edda;
+  border-radius: 4px;
+  color: #155724;
+  font-weight: 500;
+}
+
+.next-button.disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
