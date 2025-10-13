@@ -25,6 +25,7 @@ const PriceTracker = () => {
       
       <div className="price-total">
         <strong>Total: ${calculateTotalPrice().toFixed(2)}</strong>
+        <span className="price-message">{calculateTotalPrice() === 250 ? ' (Minimum charge applied)' : ''}</span>
       </div>
       
       <div className="price-note">
