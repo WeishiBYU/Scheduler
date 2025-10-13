@@ -102,6 +102,58 @@ const ConfirmationForm = () => {
         </div>
 
         <div className="summary-section">
+          <h3>Service Details</h3>
+          {customerInfo.preVacuum && (
+            <p><strong>Pre-vacuum service:</strong> {
+              customerInfo.preVacuum === 'pros-vacuum' ? 'Let the Pros pre-vacuum (adds $10 per room or rug, $5 per hall and $20 per stairway)' :
+              customerInfo.preVacuum === 'customer-vacuum' ? 'Customer will pre-vacuum including edges and corners' :
+              customerInfo.preVacuum === 'not-sure' ? 'Not sure (may be charged additional $10 per room, $20 per stairway, $5 per hallway)' :
+              customerInfo.preVacuum
+            }</p>
+          )}
+          {customerInfo.odorIssues && (
+            <p><strong>Odor treatment:</strong> {
+              customerInfo.odorIssues === 'no-odor' ? 'No Odor' :
+              customerInfo.odorIssues === 'mild-odor' ? 'Move Out or Mild Odor (1or 2 rooms = $25 then add $10 for each additional room)' :
+              customerInfo.odorIssues === 'heavy-odor' ? 'Heavy Odor (1or 2 rooms = $50. then add $30 for each additional room)' :
+              customerInfo.odorIssues
+            }</p>
+          )}
+          {customerInfo.petUrineAreas && customerInfo.petUrineAreas !== '' && (
+            <p><strong>Pet urine areas:</strong> {
+              customerInfo.petUrineAreas === '3-or-less-spots' ? 'Yes 3 or less urine spots throughout the house ($75) - notes on carpet where they are' :
+              customerInfo.petUrineAreas === '1-room' ? 'Yes 1 room or urine area ($50)' :
+              customerInfo.petUrineAreas === '2-rooms' ? 'Yes 2 rooms or urine areas ($100)' :
+              customerInfo.petUrineAreas === '3-rooms' ? 'Yes 3 rooms or urine areas ($150)' :
+              customerInfo.petUrineAreas === '4-rooms' ? 'Yes 4 rooms or urine areas ($200)' :
+              customerInfo.petUrineAreas === 'no-urine' ? 'No Urine in the carpet' :
+              customerInfo.petUrineAreas
+            }</p>
+          )}
+          {customerInfo.petUrine && customerInfo.petUrine !== '' && (
+            <p><strong>Pet urine treatment:</strong> {
+              customerInfo.petUrine === 'mild-odor' ? 'Move Out or Mild Odor (1or 2 rooms = $25 then add $10 for each additional room)' :
+              customerInfo.petUrine === 'heavy-odor' ? 'Heavy Odor (1or 2 rooms = $50. then add $30 for each additional room)' :
+              customerInfo.petUrine === 'no-odor-urine' ? 'No Odor' :
+              customerInfo.petUrine
+            }</p>
+          )}
+          {customerInfo.stains && customerInfo.stains !== '' && (
+            <p><strong>Stain treatment:</strong> {
+              customerInfo.stains === 'no-extra-pay' ? 'I have stains. I don\'t want to pay extra if they don\'t come out with the "primary stain treatment". I understand they may not budge.' :
+              customerInfo.stains === '1-3-stains' ? 'Please treat 1-3 stains ($30) - details provided below or via text pics' :
+              customerInfo.stains === '4-6-stains' ? 'Please treat 4-6 stains ($60) - details provided below or via text pics' :
+              customerInfo.stains === '7-9-stains' ? 'Please treat 7-9 stains (minimum $80.00) - details provided below or via text pics to 907-378-1228' :
+              customerInfo.stains === 'no-stains' ? 'NO STAINS' :
+              customerInfo.stains
+            }</p>
+          )}
+          {customerInfo.specialInstructions && (
+            <p><strong>Special instructions:</strong> {customerInfo.specialInstructions}</p>
+          )}
+        </div>
+
+        <div className="summary-section">
           <h3>Payment & Access Details</h3>
           <p><strong>Will you be present:</strong> {getPresentForApptText(customerInfo.presentForAppt)}</p>
           <p><strong>Payment method:</strong> {getPaymentMethodText(customerInfo.payment)}</p>

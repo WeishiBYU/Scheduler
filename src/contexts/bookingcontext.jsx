@@ -35,7 +35,14 @@ export const BookingProvider = ({ children }) => {
     address: '',
     instructions: '',
     presentForAppt: '',
-    payment: ''
+    payment: '',
+    // Additional info fields
+    preVacuum: '',
+    odorIssues: '',
+    petUrineAreas: '',
+    petUrine: '',
+    stains: '',
+    specialInstructions: ''
   });
 
   // Scheduling state

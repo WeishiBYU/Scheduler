@@ -17,7 +17,7 @@ const QuoteForm = () => {
   } = useBooking();
 
   const handleNext = () => {
-    navigate('/information');
+    navigate('/additional-info');
   };
 
   const toggleAccordion = (service) => {

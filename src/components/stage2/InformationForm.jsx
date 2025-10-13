@@ -25,7 +25,7 @@ const InformationForm = () => {
   };
 
   const handleBack = () => {
-    navigate('/quote');
+    navigate('/additional-info');
   };
 
   const handleInputChange = (e) => {
