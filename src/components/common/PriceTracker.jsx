@@ -1,14 +1,10 @@
 import React from 'react';
+import { useBooking } from '../../contexts/BookingContext';
 import './PriceTracker.css';
 
 const PriceTracker = () => {
-  // TODO: Connect to global state management
-  const selectedServices = [];
-  function calculateTotalPrice() {
-    let totalPrice = 0;
-    
-    return totalPrice;
-  }
+  const { getSelectedServices, calculateTotalPrice } = useBooking();
+  const selectedServices = getSelectedServices();
 
   return (
     <div className="price-tracker">
@@ -21,7 +17,7 @@ const PriceTracker = () => {
           selectedServices.map((service, index) => (
             <div key={index} className="service-item">
               <span className="service-name">{service.name}</span>
-              <span className="service-price">${service.price}</span>
+              <span className="service-price">${service.price.toFixed(2)}</span>
             </div>
           ))
         )}
@@ -29,7 +25,6 @@ const PriceTracker = () => {
       
       <div className="price-total">
         <strong>Total: ${calculateTotalPrice().toFixed(2)}</strong>
-        
       </div>
       
       <div className="price-note">

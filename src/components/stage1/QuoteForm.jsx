@@ -1,24 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useBooking } from '../../contexts/BookingContext';
 import './QuoteForm.css';
 
 const QuoteForm = () => {
   const navigate = useNavigate();
   const [openAccordion, setOpenAccordion] = useState('both');
-  const [carpetServices, setCarpetServices] = useState({
-    rooms: { cleaned: 0 },
-    halls: { cleaned: 0 },
-    staircases: { cleaned: 0 },
-    walkInClosets: { cleaned: 0 },
-    landings: { cleaned: 0 }
-  });
-  
-  const [upholsteryServices, setUpholsteryServices] = useState({
-    sofas: { cleaned: 0 },
-    sectionals: { cleaned: 0 },
-    loveSeats: { cleaned: 0 },
-    chairs: { cleaned: 0 }
-  });
+  const { 
+    carpetServices, 
+    setCarpetServices, 
+    upholsteryServices, 
+    setUpholsteryServices 
+  } = useBooking();
 
   const handleNext = () => {
     navigate('/schedule');
@@ -50,6 +43,7 @@ const QuoteForm = () => {
     }));
   };
 
+  // ...existing code for labels and JSX remains the same...
   const areaLabels = {
     rooms: 'Rooms',
     halls: 'Halls',
