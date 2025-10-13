@@ -88,10 +88,9 @@ export const BookingProvider = ({ children }) => {
 
   const calculateTotalPrice = () => {
     const total = getSelectedServices().reduce((total, service) => total + service.price, 0);
-    if (total < 250) return 250; // Minimum charge
-    if (total === 0) return total;
+    if (total < 250 && total !== 0) return 250; // Minimum charge
     return total
-  };
+    };
 
   const value = {
     carpetServices,
