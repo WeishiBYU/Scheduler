@@ -4,9 +4,10 @@ import './ProgressIndicator.css';
 const ProgressIndicator = ({ currentPath }) => {
   const stages = [
     { path: '/quote', label: 'Quote', step: 1 },
-    { path: '/information', label: 'Information', step: 2 },
-    { path: '/schedule', label: 'Schedule', step: 3 },
-    { path: '/confirmation', label: 'Confirmation', step: 4 },
+    { path: '/additional-info', label: 'Service Details', step: 2 },
+    { path: '/information', label: 'Information', step: 3 },
+    { path: '/schedule', label: 'Schedule', step: 4 },
+    { path: '/confirmation', label: 'Confirmation', step: 5 },
   ];
 
   const currentStage = stages.find(stage => stage.path === currentPath) || stages[0];

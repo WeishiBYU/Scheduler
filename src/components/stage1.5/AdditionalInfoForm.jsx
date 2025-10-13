@@ -74,6 +74,27 @@ const AdditionalInfoForm = () => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="petUrineAreas">
+              Are there any Pet Urine areas? *
+            </label>
+            <select 
+              id="petUrineAreas"
+              name="petUrineAreas"
+              value={customerInfo.petUrineAreas || ''}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Please select...</option>
+              <option value="no-urine">No Urine in the carpet</option>
+              <option value="3-or-less-spots">Yes 3 or less urine spots throughout the house ($75)(please put a note on the carpet where they are)</option>
+              <option value="1-room">Yes 1 room or urine area ($50)</option>
+              <option value="2-rooms">Yes 2 rooms or urine areas ($100)</option>
+              <option value="3-rooms">Yes 3 rooms or urine areas ($150)</option>
+              <option value="4-rooms">Yes 4 rooms or urine areas ($200)</option>
+            </select>
+          </div>
+
+          <div className="form-group">
             <label htmlFor="petUrine">
               Are there any pet urine stains that need special treatment? *
             </label>
@@ -85,13 +106,10 @@ const AdditionalInfoForm = () => {
               required
             >
               <option value="">Please select...</option>
-              <option value="no-urine">No Urine in the carpet</option>
-              <option value="3-or-less-spots">Yes 3 or less urine spots throughout the house ($75)(please put a note on the carpet where they are)</option>
-              <option value="1-room">Yes 1 room or urine area ($50)</option>
-              <option value="2-rooms">Yes 2 rooms or urine areas ($100)</option>
-              <option value="3-rooms">Yes 3 rooms or urine areas ($150)</option>
-              <option value="4-rooms">Yes 4 rooms or urine areas ($200)</option>
-</select>
+              <option value="no-odor-urine">No Odor</option>
+              <option value="mild-odor">Move Out or Mild Odor (1or 2 rooms = $25 then add $10 for each additional room)</option>
+              <option value="heavy-odor">Heavy Odor (1or 2 rooms = $50. then add $30 for each additional room)</option>
+            </select>
           </div>
 
           <div className="form-group">

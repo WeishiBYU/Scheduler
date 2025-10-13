@@ -29,7 +29,7 @@ const PriceTracker = () => {
       </div>
       
       <div className="price-note">
-        <small>*Final price may vary based on assessment</small>
+        <small>*Final price may vary based on assessment and additional services selected</small>
       </div>
     </div>
   );
