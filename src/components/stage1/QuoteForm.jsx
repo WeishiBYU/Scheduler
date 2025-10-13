@@ -172,7 +172,7 @@ const QuoteForm = () => {
       
       <div className="form-navigation">
         <button onClick={handleNext} className="next-button">
-          Continue to Scheduling →
+          Continue to Information →
         </button>
       </div>
     </div>

@@ -38,6 +38,73 @@
   color: #28a745 !important;
 }
 
+.what-to-expect {
+  margin: 2rem 0;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+}
+
+.what-to-expect h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
+}
+
+.what-to-expect .intro-text {
+  color: #495057;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.expect-section {
+  margin-bottom: 1.5rem;
+}
+
+.expect-section:last-child {
+  margin-bottom: 0;
+}
+
+.expect-section h4 {
+  color: #007bff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-decoration: underline;
+}
+
+.expect-section p {
+  color: #495057;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.job-details {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.job-details li {
+  color: #495057;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.job-details li:last-child {
+  margin-bottom: 0;
+  font-weight: 500;
+  color: #28a745;
+}
+
 .confirmation-actions {
   margin-top: 2rem;
 }

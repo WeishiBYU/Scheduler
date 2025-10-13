@@ -4,8 +4,8 @@ import './ProgressIndicator.css';
 const ProgressIndicator = ({ currentPath }) => {
   const stages = [
     { path: '/quote', label: 'Quote', step: 1 },
-    { path: '/schedule', label: 'Schedule', step: 2 },
-    { path: '/information', label: 'Information', step: 3 },
+    { path: '/information', label: 'Information', step: 2 },
+    { path: '/schedule', label: 'Schedule', step: 3 },
     { path: '/confirmation', label: 'Confirmation', step: 4 },
   ];
 
