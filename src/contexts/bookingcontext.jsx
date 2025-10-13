@@ -34,7 +34,8 @@ export const BookingProvider = ({ children }) => {
     phone: '',
     address: '',
     instructions: '',
-    presentForAppt: ''
+    presentForAppt: '',
+    payment: ''
   });
 
   // Scheduling state

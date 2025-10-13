@@ -32,10 +32,43 @@
   margin: 0;
 }
 
+.services-list {
+  margin-top: 0.5rem;
+}
+
+.service-item {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.service-item:last-child {
+  border-bottom: none;
+}
+
+.service-name {
+  flex: 1;
+  color: #495057;
+}
+
+.service-price {
+  font-weight: 500;
+  color: #28a745;
+}
+
 .total-price {
   font-size: 1.2rem;
   font-weight: bold;
   color: #28a745 !important;
+}
+
+.minimum-charge {
+  display: block;
+  margin-top: 0.25rem;
+  color: #6c757d;
+  font-style: italic;
 }
 
 .what-to-expect {
