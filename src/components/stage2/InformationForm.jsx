@@ -6,16 +6,16 @@ const InformationForm = () => {
   const navigate = useNavigate();
 
   const handleNext = () => {
-    navigate('/confirmation');
+    navigate('/schedule');
   };
 
   const handleBack = () => {
-    navigate('/schedule');
+    navigate('/quote');
   };
 
   return (
     <div className="information-form">
-      <h2>Step 3: Your Information</h2>
+      <h2>Step 2: Your Information</h2>
       <p>Please provide your contact details and preferences:</p>
       
       <form className="info-form">
@@ -51,10 +51,10 @@ const InformationForm = () => {
       
       <div className="form-navigation">
         <button onClick={handleBack} className="back-button">
-          ← Back to Schedule
+          ← Back to Quote
         </button>
         <button onClick={handleNext} className="next-button">
-          Continue to Confirmation →
+          Continue to Scheduling →
         </button>
       </div>
     </div>

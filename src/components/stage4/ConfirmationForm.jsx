@@ -11,7 +11,7 @@ const ConfirmationForm = () => {
   };
 
   const handleBack = () => {
-    navigate('/information');
+    navigate('/schedule');
   };
 
   return (
@@ -44,7 +44,7 @@ const ConfirmationForm = () => {
       <div className="confirmation-actions">
         <div className="form-navigation">
           <button onClick={handleBack} className="back-button">
-            ← Back to Information
+            ← Back to Scheduling
           </button>
           <button onClick={handleSubmit} className="confirm-button">
             Confirm Booking ✓

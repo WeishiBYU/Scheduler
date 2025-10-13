@@ -6,16 +6,16 @@ const SchedulingForm  = () => {
   const navigate = useNavigate();
 
   const handleNext = () => {
-    navigate('/information');
+    navigate('/confirmation');
   };
 
   const handleBack = () => {
-    navigate('/quote');
+    navigate('/information');
   };
   
   return (
     <div className="scheduling-form">
-      <h2>Step 2: Schedule Your Service</h2>
+      <h2>Step 3: Schedule Your Service</h2>
       <p>Choose your preferred date and time:</p>
       
       <div className="calendar-placeholder">
@@ -35,10 +35,10 @@ const SchedulingForm  = () => {
       
       <div className="form-navigation">
         <button onClick={handleBack} className="back-button">
-          ← Back to Quote
+          ← Back to Information
         </button>
         <button onClick={handleNext} className="next-button">
-          Continue to Information →
+          Continue to Confirmation →
         </button>
       </div>
     </div>

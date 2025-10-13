@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { BookingProvider } from './contexts/BookingContext';
 import Layout from './components/common/Layout';
 import QuoteForm from './components/stage1/QuoteForm';
-import SchedulingForm from './components/stage2/SchedulingForm';
-import InformationForm from './components/stage3/InformationForm';
+import SchedulingForm from './components/stage3/SchedulingForm';
+import InformationForm from './components/stage2/InformationForm';
 import ConfirmationForm from './components/stage4/ConfirmationForm';
 import './App.css';
 
@@ -16,8 +16,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/quote" replace />} />
             <Route path="/quote" element={<QuoteForm />} />
-            <Route path="/schedule" element={<SchedulingForm />} />
             <Route path="/information" element={<InformationForm />} />
+            <Route path="/schedule" element={<SchedulingForm />} />
             <Route path="/confirmation" element={<ConfirmationForm />} />
           </Routes>
         </Layout>
