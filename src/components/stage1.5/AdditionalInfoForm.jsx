@@ -95,24 +95,6 @@ const AdditionalInfoForm = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="petUrine">
-              Are there any pet urine stains that need special treatment? 
-            </label>
-            <select 
-              id="petUrine"
-              name="petUrine"
-              value={customerInfo.petUrine || ''}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Please select...</option>
-              <option value="no-odor-urine">No Odor</option>
-              <option value="mild-odor">Move Out or Mild Odor (1or 2 rooms = $25 then add $10 for each additional room)</option>
-              <option value="heavy-odor">Heavy Odor (1or 2 rooms = $50. then add $30 for each additional room)</option>
-            </select>
-          </div>
-
-          <div className="form-group">
             <label htmlFor="stains">
               Are there any specific stains or problem areas? 
             </label>
