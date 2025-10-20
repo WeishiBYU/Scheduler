@@ -48,7 +48,7 @@ const InformationForm = () => {
       
       <form className="info-form" onSubmit={handleNext}>
         <div className="form-group">
-          <label htmlFor="firstName">First Name *</label>
+          <label htmlFor="firstName">First Name </label>
           <input 
             type="text" 
             id="firstName" 
@@ -61,7 +61,7 @@ const InformationForm = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="lastName">Last Name *</label>
+          <label htmlFor="lastName">Last Name </label>
           <input 
             type="text" 
             id="lastName" 
@@ -74,7 +74,7 @@ const InformationForm = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="email">Email Address *</label>
+          <label htmlFor="email">Email Address </label>
           <input 
             type="email" 
             id="email" 
@@ -87,7 +87,7 @@ const InformationForm = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="phone">Phone Number *</label>
+          <label htmlFor="phone">Phone Number </label>
           <input 
             type="tel" 
             id="phone" 
@@ -96,12 +96,12 @@ const InformationForm = () => {
             onChange={handleInputChange}
             required 
           />
-          <small className="field-description">*By giving your phone number you give permission to Alaska Floor Care to update you via SMS/MMS with information regarding your booking. You can opt out of these SMS messages anytime by replying STOP. We do not sell or distribute your data to third parties. Data rates may apply to the SMS messages you receive. Thank you.
+          <small className="field-description">By giving your phone number you give permission to Alaska Floor Care to update you via SMS/MMS with information regarding your booking. You can opt out of these SMS messages anytime by replying STOP. We do not sell or distribute your data to third parties. Data rates may apply to the SMS messages you receive. Thank you.
             Please find our Privacy Statement here: <a href="https://www.alaskafloorcare.com/general-5" target="_blank" rel="noopener noreferrer">https://www.alaskafloorcare.com/general-5</a></small>
         </div>
         
         <div className="form-group">
-          <label htmlFor="address">Service Address *</label>
+          <label htmlFor="address">Service Address </label>
           <textarea 
             id="address" 
             name="address" 
@@ -114,7 +114,7 @@ const InformationForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="presentForAppt">Will the paying party be there to let us in on the day of the appointment? If not, we WILL NEED PRE-PAYMENT. *</label>
+          <label htmlFor="presentForAppt">Will the paying party be there to let us in on the day of the appointment? If not, we WILL NEED PRE-PAYMENT. </label>
           <select 
             id="presentForAppt" 
             name="presentForAppt" 
@@ -133,7 +133,7 @@ const InformationForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="payment">PAYMENT *</label>
+          <label htmlFor="payment">PAYMENT </label>
           <select 
             id="payment" 
             name="payment" 

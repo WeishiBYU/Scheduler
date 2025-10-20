@@ -65,6 +65,19 @@
   font-family: inherit;
 }
 
+.form-group label[for="email"]::after,
+.form-group label[for="lastName"]::after,
+.form-group label[for="firstName"]::after,
+.form-group label[for="phone"]::after,
+.form-group label[for="payment"]::after,
+.form-group label[for="address"]::after,
+.form-group label[for="presentForAppt"]::after {
+  content: " *";
+  color: #ef4444;
+  font-weight: 600;
+}
+
+
 .field-description {
   display: block;
   margin-top: 0.25rem;
