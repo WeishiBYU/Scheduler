@@ -3,31 +3,33 @@ import { useBooking } from '../../contexts/BookingContext';
 import './PriceTracker.css';
 
 const PriceTracker = () => {
-  const { getSelectedServices, calculateAdditionalServices, calculateTotalPrice } = useBooking();
+  const { getSelectedServices, getAdditionalServicesDetails, calculateTotalPrice } = useBooking();
   const selectedServices = getSelectedServices();
-  const additionalCost = calculateAdditionalServices();
+  const additionalServices = getAdditionalServicesDetails();
 
   return (
     <div className="price-tracker">
       <h3>Your Quote</h3>
       
       <div className="services-list">
-        {selectedServices.length === 0 ? (
+        {selectedServices.length === 0 && additionalServices.length === 0 ? (
           <p className="no-services">No services selected</p>
         ) : (
-          selectedServices.map((service, index) => (
-            <div key={index} className="service-item">
-              <span className="service-name">{service.name}</span>
-              <span className="service-price">${service.price.toFixed(2)}</span>
-            </div>
-          ))
-        )}
-        
-        {additionalCost > 0 && (
-          <div className="service-item additional-services">
-            <span className="service-name">Additional Services</span>
-            <span className="service-price">${additionalCost.toFixed(2)}</span>
-          </div>
+          <>
+            {selectedServices.map((service, index) => (
+              <div key={`main-${index}`} className="service-item">
+                <span className="service-name">{service.name}</span>
+                <span className="service-price">${service.price.toFixed(2)}</span>
+              </div>
+            ))}
+            
+            {additionalServices.map((service, index) => (
+              <div key={`additional-${index}`} className="service-item additional-services">
+                <span className="service-name">{service.name}</span>
+                <span className="service-price">${service.price.toFixed(2)}</span>
+              </div>
+            ))}
+          </>
         )}
       </div>
       
