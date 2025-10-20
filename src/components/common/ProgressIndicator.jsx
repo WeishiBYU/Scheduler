@@ -11,7 +11,8 @@ const ProgressIndicator = ({ currentPath }) => {
   ];
 
   const currentStage = stages.find(stage => stage.path === currentPath) || stages[0];
-  const progress = (currentStage.step / stages.length) * 100;
+  const progress = (currentStage.step / stages.length) * 100 + (5 * currentStage.step);
+  console.log(progress);
 
   return (
     <div className="progress-indicator">

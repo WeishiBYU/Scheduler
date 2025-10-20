@@ -36,7 +36,7 @@ const AdditionalInfoForm = () => {
           <h3>Pre-Cleaning Preparation</h3>
           <div className="form-group">
             <label htmlFor="preVacuum">
-              Would you like us to vacuum before cleaning? *
+              Would you like us to vacuum before cleaning? 
             </label>
             <select 
               id="preVacuum"
@@ -57,7 +57,7 @@ const AdditionalInfoForm = () => {
           <h3>Special Concerns</h3>
           <div className="form-group">
             <label htmlFor="odorIssues">
-              Do you want odor treatment? We highly recommend heavy odor treatment if you have shedding pets. *
+              Do you want odor treatment? We highly recommend heavy odor treatment if you have shedding pets. 
             </label>
             <select 
               id="odorIssues"
@@ -75,7 +75,7 @@ const AdditionalInfoForm = () => {
 
           <div className="form-group">
             <label htmlFor="petUrineAreas">
-              Are there any Pet Urine areas? *
+              Are there any Pet Urine areas? 
             </label>
             <select 
               id="petUrineAreas"
@@ -96,7 +96,7 @@ const AdditionalInfoForm = () => {
 
           <div className="form-group">
             <label htmlFor="petUrine">
-              Are there any pet urine stains that need special treatment? *
+              Are there any pet urine stains that need special treatment? 
             </label>
             <select 
               id="petUrine"
@@ -114,7 +114,7 @@ const AdditionalInfoForm = () => {
 
           <div className="form-group">
             <label htmlFor="stains">
-              Are there any specific stains or problem areas? *
+              Are there any specific stains or problem areas? 
             </label>
             <select 
               id="stains"
