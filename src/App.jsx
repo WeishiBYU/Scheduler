@@ -7,6 +7,7 @@ import AdditionalInfoForm from './components/stage1.5/AdditionalInfoForm';
 import InformationForm from './components/stage2/InformationForm';
 import SchedulingForm from './components/stage3/SchedulingForm';
 import ConfirmationForm from './components/stage4/ConfirmationForm';
+import { Login, Profile } from './components/login/Login';
 import './App.css';
 
 function App() {
@@ -21,6 +22,8 @@ function App() {
             <Route path="/information" element={<InformationForm />} />
             <Route path="/schedule" element={<SchedulingForm />} />
             <Route path="/confirmation" element={<ConfirmationForm />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </Layout>
       </Router>

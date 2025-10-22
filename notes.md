@@ -18,3 +18,9 @@ Ask how they heard about us
 Middleware, A middle api to api 
 - to see the accesses to the API
 - to check authenication
+
+Things to learn better
+- Async
+- req, res
+- Promise
+- Java Script Fuctions
