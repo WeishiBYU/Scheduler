@@ -14,3 +14,7 @@ Backend
 
 Don't like, voip because can't be custom text
 Ask how they heard about us
+
+Middleware, A middle api to api 
+- to see the accesses to the API
+- to check authenication
