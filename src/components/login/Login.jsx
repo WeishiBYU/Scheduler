@@ -7,6 +7,22 @@ function Login() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
+  React.useEffect(() => {
+    const checkLogin = async () => {
+      try {
+      const res = await fetch('api/user/me');
+      if (res.ok) {
+      navigate('/profile');
+      }
+    } catch (error) {
+      console.error('Error checking login status:', error);
+    }
+  };
+
+  checkLogin();
+
+}, []);
+
   function handleLogin() {
     createAuth('PUT');
   }
@@ -28,6 +44,8 @@ function Login() {
       alert('Authentication failed');
     }
   }
+
+
 
   return (
     <div>
@@ -68,11 +86,12 @@ function Profile() {
     });
     navigate('/');
   }
-
+  
   return (
     <div>
       <h1>Profile</h1>
       <div>Logged in as: {userInfo.email}</div>
+      <div>API Key: {userInfo.apiKey}</div>
       <button type='button' onClick={handleLogout}>
         Logout
       </button>

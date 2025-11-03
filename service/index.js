@@ -6,6 +6,8 @@ const bcrypt = require('bcryptjs');
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static('public'));
+
 
 // Middleware to log requests
 app.use((req, res, next) => {
@@ -28,7 +30,7 @@ app.post('/api/auth', async (req, res) => {
     const user = await createUser(req.body.email, req.body.password);
     setAuthCookie(res, user);
 
-    res.send({ email: user.email });
+    res.send({ email: user.email, apiKey: user.apiKey });
   }
 });
 
@@ -38,7 +40,7 @@ app.put('/api/auth', async (req, res) => {
   if (user && (await bcrypt.compare(req.body.password, user.password))) {
     setAuthCookie(res, user);
 
-    res.send({ email: user.email });
+    res.send({ email: user.email, apiKey: user.apiKey });
   } else {
     res.status(401).send({ msg: 'Unauthorized' });
   }
@@ -60,7 +62,7 @@ app.get('/api/user/me', async (req, res) => {
   const token = req.cookies['token'];
   const user = await getUser('token', token);
   if (user) {
-    res.send({ email: user.email });
+    res.send({ email: user.email, apiKey: user.apiKey });
   } else {
     res.status(401).send({ msg: 'Unauthorized' });
   }
@@ -74,6 +76,7 @@ async function createUser(email, password) {
   const user = {
     email: email,
     password: passwordHash,
+    apiKey: uuid.v4(),
   };
 
   users.push(user);
@@ -103,7 +106,7 @@ function clearAuthCookie(res, user) {
   res.clearCookie('token');
 }
 
-const port = 3000;
+const port = 4000;
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
 });
