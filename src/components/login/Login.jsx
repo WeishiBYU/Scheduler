@@ -32,7 +32,7 @@ function Login() {
   }
 
   async function createAuth(method) {
-    const res = await fetch('api/auth', {
+    const res = await fetch('api/auth/create', {
       method: method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -81,7 +81,7 @@ function Profile() {
   }, []);
 
   function handleLogout() {
-    fetch('api/auth', {
+    fetch('api/auth/logout', {
       method: 'DELETE',
     });
     navigate('/');
