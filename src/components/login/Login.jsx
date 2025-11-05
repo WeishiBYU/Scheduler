@@ -23,17 +23,23 @@ function Login() {
 
 }, []);
 
-  function handleLogin() {
-    createAuth('PUT');
+  async function handleLogin() {
+    const res = await fetch('api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    await res.json();
+    if (res.ok) {
+      navigate('/profile');
+    } else {
+      alert('Authentication failed');
+    }
   }
 
-  function handleRegister() {
-    createAuth('POST');
-  }
-
-  async function createAuth(method) {
+  async function handleRegister() {
     const res = await fetch('api/auth/create', {
-      method: method,
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });

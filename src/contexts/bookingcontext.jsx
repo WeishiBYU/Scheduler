@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const BookingContext = createContext();
 
@@ -51,13 +51,27 @@ export const BookingProvider = ({ children }) => {
   // Available time slots
   const timeSlots = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
 
-  // Booked appointments (this would typically come from a database)
-  const [bookedAppointments, setBookedAppointments] = useState([
-    // Example booked slots - in real app this would come from your backend
-    { date: '2025-10-15', time: '9:00 AM' },
-    { date: '2025-10-15', time: '1:00 PM' },
-    { date: '2025-10-16', time: '11:00 AM' },
-  ]);
+  // Booked appointments (fetched from backend)
+  const [bookedAppointments, setBookedAppointments] = useState([]);
+
+  // Fetch booked appointments on component mount
+  React.useEffect(() => {
+    const fetchBookedAppointments = async () => {
+      try {
+        const response = await fetch('/api/appointments');
+        if (response.ok) {
+          const appointments = await response.json();
+          setBookedAppointments(appointments);
+        } else {
+          console.error('Failed to fetch appointments');
+        }
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchBookedAppointments();
+  }, []);
 
   // Check if a date is available (not fully booked)
   const isDateAvailable = (date) => {

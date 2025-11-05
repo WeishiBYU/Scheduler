@@ -25,11 +25,10 @@ app.use(`/api`, apiRouter);
 
 // Middleware to log requests
 apiRouter.use((req, res, next) => {
-  console.log(req.method);
-  console.log(req.originalUrl);
-  console.log(req.body);
-  console.log(req.cookies);
-  console.log(users);
+  console.log(`${req.method} ${req.originalUrl}`);
+  if (Object.keys(req.body).length > 0) {
+    console.log('Request body:', req.body);
+  }
   next();
 });
 
@@ -93,16 +92,69 @@ apiRouter.get('/user/me', async (req, res) => {
   }
 });
 
-// GetScores
-apiRouter.get('/scores', verifyAuth, async (req, res) => {
-  const scores = await DB.getHighScores();
-  res.send(scores);
+// Get all bookings (admin only) or user's bookings
+apiRouter.get('/bookings', verifyAuth, async (req, res) => {
+  try {
+    const user = await findUser('token', req.cookies[authCookieName]);
+    const bookings = await DB.getBookings(user.email);
+    res.send(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).send({ msg: 'Error fetching bookings' });
+  }
 });
 
-// SubmitScore
-apiRouter.post('/score', verifyAuth, async (req, res) => {
-  const scores = updateScores(req.body);
-  res.send(scores);
+// Create new booking
+apiRouter.post('/booking', async (req, res) => {
+  try {
+    const booking = req.body;
+    
+    // Basic validation
+    if (!booking.customerInfo || !booking.selectedDate || !booking.selectedTime) {
+      return res.status(400).send({ msg: 'Missing required booking information' });
+    }
+    
+    const result = await DB.addBooking(booking);
+    res.status(201).send({ 
+      msg: 'Booking created successfully', 
+      bookingId: result.insertedId 
+    });
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    res.status(500).send({ msg: 'Error creating booking' });
+  }
+});
+
+// Get available time slots for a date
+apiRouter.get('/availability/:date', async (req, res) => {
+  try {
+    const date = req.params.date;
+    const bookings = await DB.getBookingsByDate(date);
+    const bookedTimes = bookings.map(b => b.selectedTime);
+    
+    const allTimeSlots = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
+    const availableSlots = allTimeSlots.filter(slot => !bookedTimes.includes(slot));
+    
+    res.send({ availableSlots, bookedTimes });
+  } catch (error) {
+    console.error('Error checking availability:', error);
+    res.status(500).send({ msg: 'Error checking availability' });
+  }
+});
+
+// Get all booked appointments (for calendar)
+apiRouter.get('/appointments', async (req, res) => {
+  try {
+    const appointments = await DB.getBookedAppointments();
+    const formattedAppointments = appointments.map(apt => ({
+      date: apt.selectedDate,
+      time: apt.selectedTime
+    }));
+    res.send(formattedAppointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).send({ msg: 'Error fetching appointments' });
+  }
 });
 
 // Default error handler
@@ -115,11 +167,7 @@ app.use((_req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
-// updateScores considers a new score for inclusion in the high scores.
-async function updateScores(newScore) {
-  await DB.addScore(newScore);
-  return DB.getHighScores();
-}
+
 
 async function createUser(email, password) {
   const passwordHash = await bcrypt.hash(password, 10);

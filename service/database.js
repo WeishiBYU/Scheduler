@@ -3,9 +3,9 @@ const config = require('./dbConfig.json');
 
 const url = `mongodb+srv://${config.userName}:${config.password}@${config.hostname}`;
 const client = new MongoClient(url);
-const db = client.db('simon');
+const db = client.db('scheduler');
 const userCollection = db.collection('user');
-const scoreCollection = db.collection('score');
+const bookingCollection = db.collection('booking');
 
 // This will asynchronously test the connection and exit the process if it fails
 (async function testConnection() {
@@ -34,17 +34,34 @@ async function updateUser(user) {
   await userCollection.updateOne({ email: user.email }, { $set: user });
 }
 
-async function addScore(score) {
-  return scoreCollection.insertOne(score);
+async function addBooking(booking) {
+  const bookingWithTimestamp = {
+    ...booking,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  return bookingCollection.insertOne(bookingWithTimestamp);
 }
 
-function getHighScores() {
-  const query = { score: { $gt: 0, $lt: 900 } };
+function getBookings(userEmail = null) {
+  const query = userEmail ? { 'customerInfo.email': userEmail } : {};
   const options = {
-    sort: { score: -1 },
-    limit: 10,
+    sort: { 'selectedDate': 1 },
   };
-  const cursor = scoreCollection.find(query, options);
+  const cursor = bookingCollection.find(query, options);
+  return cursor.toArray();
+}
+
+function getBookingsByDate(date) {
+  const query = { 'selectedDate': date };
+  const cursor = bookingCollection.find(query);
+  return cursor.toArray();
+}
+
+function getBookedAppointments() {
+  const cursor = bookingCollection.find({}, {
+    projection: { selectedDate: 1, selectedTime: 1 }
+  });
   return cursor.toArray();
 }
 
@@ -53,6 +70,8 @@ module.exports = {
   getUserByToken,
   addUser,
   updateUser,
-  addScore,
-  getHighScores,
+  addBooking,
+  getBookings,
+  getBookingsByDate,
+  getBookedAppointments,
 };

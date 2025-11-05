@@ -16,15 +16,41 @@ const ConfirmationForm = () => {
   const selectedServices = getSelectedServices();
   const totalPrice = calculateTotalPrice();
 
-  const handleSubmit = () => {
-    alert('Booking confirmed! You will receive a confirmation email shortly.');
-    // TODO: Submit booking data to backend
-    console.log('Booking Data:', {
-      services: selectedServices,
-      customer: customerInfo,
-      appointment: { date: selectedDate, time: selectedTime },
-      total: totalPrice
-    });
+  const handleSubmit = async () => {
+    try {
+      const bookingData = {
+        services: selectedServices,
+        customerInfo,
+        selectedDate: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+        selectedTime,
+        totalPrice,
+        additionalServices: getAdditionalServicesDetails()
+      };
+
+      console.log('Submitting booking data:', bookingData);
+
+      const response = await fetch('/api/booking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert('Booking confirmed! You will receive a confirmation email shortly.');
+        console.log('Booking created successfully:', result);
+        // Optionally redirect to a success page or reset the form
+      } else {
+        const error = await response.json();
+        alert(`Error creating booking: ${error.msg || 'Unknown error'}`);
+        console.error('Booking error:', error);
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      alert('Error submitting booking. Please try again.');
+    }
   };
 
   const handleBack = () => {

@@ -1,7 +1,7 @@
 {
-  "name": "startup-service",
+  "name": "scheduler-service",
   "version": "1.0.0",
-  "description": "This demonstrates a service for a web application.",
+  "description": "Backend service for carpet cleaning scheduling application.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -12,6 +12,7 @@
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
+    "mongodb": "^6.3.0",
     "uuid": "^11.0.5"
   }
 }
