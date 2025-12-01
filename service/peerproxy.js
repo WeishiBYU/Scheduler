@@ -5,7 +5,9 @@ const app = express();
 // Serve up the chat frontend
 app.use(express.static('./public'));
 
-const port = process.argv.length > 2 ? process.argv[2] : 3000;
+function peerProxy(httpServer) {
+
+const port = process.argv.length > 2 ? process.argv[2] : httpServer;
 server = app.listen(port, () => {
   console.log(`Listening on ${port}`);
 });
@@ -40,3 +42,5 @@ setInterval(() => {
     client.ping();
   });
 }, 10000);
+}
+module.exports = { peerProxy };
