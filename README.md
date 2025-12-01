@@ -31,3 +31,6 @@ I am going to use the required technologies in the following ways.
     - HOUSE CALL PRO API Apis
 - **Database**: Store quotes, api information.
 - **WebSocket**: As an user gets quote, it is saved on the sheets website.
+
+Update:
+    Added websocket of a chat page on the bottom of the page!
