@@ -8,6 +8,8 @@ import InformationForm from './components/stage2/InformationForm';
 import SchedulingForm from './components/stage3/SchedulingForm';
 import ConfirmationForm from './components/stage4/ConfirmationForm';
 import { Login, Profile } from './components/login/Login';
+import Chat from './components/chat/chat.jsx';
+import { ChatClient } from './components/chat/Notifer.js';
 import './App.css';
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
             <Route path="/confirmation" element={<ConfirmationForm />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/chat" element={<Chat webSocket={new ChatClient()} />} />
           </Routes>
         </Layout>
       </Router>

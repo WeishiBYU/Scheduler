@@ -1,36 +1,42 @@
 const { WebSocketServer } = require('ws');
+const express = require('express');
+const app = express();
 
-function peerProxy(httpServer) {
-  // Create a websocket object
-  const socketServer = new WebSocketServer({ server: httpServer });
+// Serve up the chat frontend
+app.use(express.static('./public'));
 
-  socketServer.on('connection', (socket) => {
-    socket.isAlive = true;
+const port = process.argv.length > 2 ? process.argv[2] : 3000;
+server = app.listen(port, () => {
+  console.log(`Listening on ${port}`);
+});
 
-    // Forward messages to everyone except the sender
-    socket.on('message', function message(data) {
-      socketServer.clients.forEach((client) => {
-        if (client !== socket && client.readyState === WebSocket.OPEN) {
-          client.send(data);
-        }
-      });
-    });
+// Create a websocket object
+const socketServer = new WebSocketServer({ server });
 
-    // Respond to pong messages by marking the connection alive
-    socket.on('pong', () => {
-      socket.isAlive = true;
+socketServer.on('connection', (socket) => {
+  socket.isAlive = true;
+
+  // Forward messages to everyone except the sender
+  socket.on('message', function message(data) {
+    socketServer.clients.forEach(function each(client) {
+      if (client !== socket && client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
     });
   });
 
-  // Periodically send out a ping message to make sure clients are alive
-  setInterval(() => {
-    socketServer.clients.forEach(function each(client) {
-      if (client.isAlive === false) return client.terminate();
+  // Respond to pong messages by marking the connection alive
+  socket.on('pong', () => {
+    socket.isAlive = true;
+  });
+});
 
-      client.isAlive = false;
-      client.ping();
-    });
-  }, 10000);
-}
+// Periodically send out a ping message to make sure clients are alive
+setInterval(() => {
+  socketServer.clients.forEach(function each(client) {
+    if (client.isAlive === false) return client.terminate();
 
-module.exports = { peerProxy };
+    client.isAlive = false;
+    client.ping();
+  });
+}, 10000);
