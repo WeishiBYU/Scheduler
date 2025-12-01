@@ -7,6 +7,7 @@ const ConfirmationForm = () => {
   const navigate = useNavigate();
   const { 
     getSelectedServices, 
+    getAdditionalServicesDetails,
     calculateTotalPrice, 
     customerInfo, 
     selectedDate, 
@@ -14,6 +15,7 @@ const ConfirmationForm = () => {
   } = useBooking();
 
   const selectedServices = getSelectedServices();
+  const additionalServices = getAdditionalServicesDetails();
   const totalPrice = calculateTotalPrice();
 
   const handleSubmit = async () => {
@@ -24,7 +26,7 @@ const ConfirmationForm = () => {
         selectedDate: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
         selectedTime,
         totalPrice,
-        additionalServices: getAdditionalServicesDetails()
+        additionalServices: additionalServices
       };
 
       console.log('Submitting booking data:', bookingData);
@@ -109,6 +111,20 @@ const ConfirmationForm = () => {
             </div>
           )}
         </div>
+
+        {additionalServices.length > 0 && (
+          <div className="summary-section">
+            <h3>Additional Services</h3>
+            <div className="services-list">
+              {additionalServices.map((service, index) => (
+                <div key={index} className="service-item">
+                  <span className="service-name">{service.name}</span>
+                  <span className="service-price">${service.price.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         <div className="summary-section">
           <h3>Scheduled Date & Time</h3>
@@ -188,7 +204,7 @@ const ConfirmationForm = () => {
         <div className="summary-section">
           <h3>Total Price</h3>
           <p className="total-price">${totalPrice.toFixed(2)}</p>
-          {totalPrice === 250 && selectedServices.length > 0 && (
+          {totalPrice === 250 && (selectedServices.length > 0 || additionalServices.length > 0) && (
             <small className="minimum-charge">*Minimum charge applied</small>
           )}
         </div>
