@@ -1,19 +1,18 @@
 const { WebSocketServer } = require('ws');
-const express = require('express');
-const app = express();
-
-// Serve up the chat frontend
-app.use(express.static('./public'));
 
 function peerProxy(httpServer) {
-
-const port = process.argv.length > 2 ? process.argv[2] : httpServer;
-server = app.listen(port, () => {
-  console.log(`Listening on ${port}`);
-});
-
 // Create a websocket object
-const socketServer = new WebSocketServer({ server });
+
+(async function testConnection() {
+  try {
+    console.log(`Connect to Chat`);
+  } catch (ex) {
+    console.log(`Unable to connect to Chat because ${ex.message}`);
+    process.exit(1);
+  }
+})();
+
+const socketServer = new WebSocketServer({  server: httpServer });
 
 socketServer.on('connection', (socket) => {
   socket.isAlive = true;
@@ -43,4 +42,5 @@ setInterval(() => {
   });
 }, 10000);
 }
+
 module.exports = { peerProxy };

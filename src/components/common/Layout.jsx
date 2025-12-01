@@ -54,8 +54,13 @@ const Layout = ({ children }) => {
       </main>
       
       <footer className="layout-footer">
-        <p>&copy; 2025 Carpet & Upholstery Cleaning Service <a href="/quote" id="quote-link">Quote</a></p>
-        
+        <p>&copy; 2025 Carpet & Upholstery Cleaning Service </p>
+
+        <div>
+        <a href="/quote" id="quote-link">Quote |</a>
+        <a href="/chat" id="chat-link"> Chat</a>
+        </div>
+
         <div id="login-link-container">
           <a href="/login" id="login-link">Login </a>
         </div>
