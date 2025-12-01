@@ -55,10 +55,15 @@ function Message({ name, webSocket }) {
 
 function Conversation({ webSocket }) {
   const [chats, setChats] = React.useState([]);
+  const observerAdded = React.useRef(false);
+
   React.useEffect(() => {
+    if (!observerAdded.current) {
     webSocket.addObserver((chat) => {
       setChats((prevMessages) => [...prevMessages, chat]);
     });
+    observerAdded.current = true;
+    }
   }, [webSocket]);
 
   const chatEls = chats.map((chat, index) => (
@@ -70,6 +75,7 @@ function Conversation({ webSocket }) {
   return (
     <main>
       <div id='chat-text'>{chatEls}</div>
+      <div id='chat-text'>Working</div>
     </main>
   );
 }
