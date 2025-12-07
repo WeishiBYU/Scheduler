@@ -28,11 +28,14 @@ Things to learn better
 Todo
 []Add calender input
     []a way to input what time slots are available in excel
-    []available time slots is populated
-    []available time slots are updated
+    [x]available time slots is populated
+    [x]available time slots are updated
     []
 
 []BackEnd export
+
+[]need to check all form in filled
+[]Need a better looking mobile view
 []Add tracking
 []Redo pricing
 []Add saving

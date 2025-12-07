@@ -3,7 +3,9 @@ const bcrypt = require('bcryptjs');
 const express = require('express');
 const uuid = require('uuid');
 const app = express();
+require('dotenv').config();
 const DB = require('./database.js');
+const GoogleSheetsService = require('./googleSheetsService.js');
 const { peerProxy } = require('./peerproxy.js');
 
 const authCookieName = 'token';
@@ -115,7 +117,21 @@ apiRouter.post('/booking', async (req, res) => {
       return res.status(400).send({ msg: 'Missing required booking information' });
     }
     
+    // Check if date is available in Google Sheets
+    const isAvailable = await GoogleSheetsService.isDateAvailable(booking.selectedDate);
+    if (!isAvailable) {
+      return res.status(400).send({ msg: 'Selected date is not available' });
+    }
+    
+    // Add to database
     const result = await DB.addBooking(booking);
+    
+    // Add to Google Sheets
+    await GoogleSheetsService.addAppointmentToSheet({
+      selectedDate: booking.selectedDate,
+      selectedTime: booking.selectedTime
+    });
+    
     res.status(201).send({ 
       msg: 'Booking created successfully', 
       bookingId: result.insertedId 
@@ -146,12 +162,25 @@ apiRouter.get('/availability/:date', async (req, res) => {
 // Get all booked appointments (for calendar)
 apiRouter.get('/appointments', async (req, res) => {
   try {
-    const appointments = await DB.getBookedAppointments();
-    const formattedAppointments = appointments.map(apt => ({
-      date: apt.selectedDate,
-      time: apt.selectedTime
-    }));
-    res.send(formattedAppointments);
+    // Fetch from Google Sheets first, then fallback to database
+    let appointments = await GoogleSheetsService.fetchBookedAppointments();
+    
+    if (appointments.length === 0) {
+      // Fallback to database if Google Sheets is empty or unavailable
+      const dbAppointments = await DB.getBookedAppointments();
+      appointments = dbAppointments.map(apt => ({
+        date: apt.selectedDate,
+        time: apt.selectedTime
+      }));
+    } else {
+      // Format Google Sheets data
+      appointments = appointments.map(apt => ({
+        date: apt.selectedDate,
+        time: apt.selectedTime
+      }));
+    }
+    
+    res.send(appointments);
   } catch (error) {
     console.error('Error fetching appointments:', error);
     res.status(500).send({ msg: 'Error fetching appointments' });
@@ -202,8 +231,12 @@ function setAuthCookie(res, authToken) {
   });
 }
 
-const httpService = app.listen(port, () => {
+const httpService = app.listen(port, async () => {
   console.log(`Listening on port ${port}`);
+  
+  // Test Google Sheets connection on startup
+  console.log('\n🔍 Testing Google Sheets integration...');
+  await GoogleSheetsService.testConnection();
 });
 
 peerProxy(httpService);
