@@ -24,3 +24,15 @@ Things to learn better
 - req, res
 - Promise
 - Java Script Fuctions
+
+Todo
+[]Add calender input
+    []a way to input what time slots are available in excel
+    []available time slots is populated
+    []available time slots are updated
+    []
+
+[]BackEnd export
+[]Add tracking
+[]Redo pricing
+[]Add saving

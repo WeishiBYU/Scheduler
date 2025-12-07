@@ -93,6 +93,11 @@ export const BookingProvider = ({ children }) => {
     return timeSlots.filter(time => isTimeSlotAvailable(date, time));
   };
 
+  // Add a new booked appointment to the state
+  const addBookedAppointment = (appointment) => {
+    setBookedAppointments(prev => [...prev, appointment]);
+  };
+
   // Check if date should be disabled in calendar
   const isDateDisabled = (date) => {
     const today = new Date();
@@ -300,7 +305,8 @@ export const BookingProvider = ({ children }) => {
     isTimeSlotAvailable,
     getAvailableTimeSlots,
     isDateDisabled,
-    bookedAppointments
+    bookedAppointments,
+    addBookedAppointment
   };
 
   return (

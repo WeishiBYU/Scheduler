@@ -11,7 +11,8 @@ const ConfirmationForm = () => {
     calculateTotalPrice, 
     customerInfo, 
     selectedDate, 
-    selectedTime 
+    selectedTime,
+    addBookedAppointment
   } = useBooking();
 
   const selectedServices = getSelectedServices();
@@ -41,6 +42,15 @@ const ConfirmationForm = () => {
 
       if (response.ok) {
         const result = await response.json();
+        
+        // Update the booked appointments state
+        if (selectedDate && selectedTime) {
+          addBookedAppointment({
+            date: selectedDate.toISOString().split('T')[0],
+            time: selectedTime
+          });
+        }
+        
         alert('Booking confirmed! You will receive a confirmation email shortly.');
         console.log('Booking created successfully:', result);
         // Optionally redirect to a success page or reset the form
