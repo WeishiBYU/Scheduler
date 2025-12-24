@@ -126,15 +126,32 @@ apiRouter.post('/booking', async (req, res) => {
     // Add to database
     const result = await DB.addBooking(booking);
     
-    // Add to Google Sheets
-    await GoogleSheetsService.addAppointmentToSheet({
+    // Get current time slots for availability checking
+    const timeSlots = await GoogleSheetsService.fetchTimeSlots();
+    const allAppointments = await DB.getBookedAppointments();
+    
+    // Add to Google Sheets and check/update availability
+    const appointment = {
       selectedDate: booking.selectedDate,
       selectedTime: booking.selectedTime
+    };
+    
+    const sheetResult = await GoogleSheetsService.addAppointmentAndUpdateAvailability(
+      appointment, 
+      timeSlots, 
+      [...allAppointments, appointment]
+    );
+    
+    console.log('✅ Booking processing completed:', {
+      databaseSaved: !!result.insertedId,
+      sheetUpdated: sheetResult.appointmentAdded,
+      availabilityChecked: sheetResult.availabilityUpdated
     });
     
     res.status(201).send({ 
       msg: 'Booking created successfully', 
-      bookingId: result.insertedId 
+      bookingId: result.insertedId,
+      availabilityStatus: sheetResult.message
     });
   } catch (error) {
     console.error('Error creating booking:', error);
@@ -149,13 +166,51 @@ apiRouter.get('/availability/:date', async (req, res) => {
     const bookings = await DB.getBookingsByDate(date);
     const bookedTimes = bookings.map(b => b.selectedTime);
     
-    const allTimeSlots = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
+    // Get date-specific time slots from Google Sheets
+    const allTimeSlots = await GoogleSheetsService.fetchTimeSlotsForDate(date);
     const availableSlots = allTimeSlots.filter(slot => !bookedTimes.includes(slot));
     
     res.send({ availableSlots, bookedTimes });
   } catch (error) {
     console.error('Error checking availability:', error);
     res.status(500).send({ msg: 'Error checking availability' });
+  }
+});
+
+// Get time slots from Google Sheets (all unique slots)
+apiRouter.get('/time-slots', async (req, res) => {
+  try {
+    const timeSlots = await GoogleSheetsService.fetchTimeSlots();
+    res.send(timeSlots);
+  } catch (error) {
+    console.error('Error fetching time slots:', error);
+    // Fallback to default time slots
+    res.send(['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM']);
+  }
+});
+
+// Get time slots for a specific date from Google Sheets
+apiRouter.get('/time-slots/:date', async (req, res) => {
+  try {
+    const date = req.params.date;
+    const timeSlots = await GoogleSheetsService.fetchTimeSlotsForDate(date);
+    res.send(timeSlots);
+  } catch (error) {
+    console.error('Error fetching time slots for date:', error);
+    // Return 404 or 500 to indicate the date should be disabled
+    res.status(500).send({ msg: 'Error fetching time slots for this date', error: error.message });
+  }
+});
+
+// Get available dates from Google Sheets
+apiRouter.get('/available-dates', async (req, res) => {
+  try {
+    const availableDates = await GoogleSheetsService.fetchAvailableDates();
+    res.send(availableDates);
+  } catch (error) {
+    console.error('Error fetching available dates:', error);
+    // Return empty array if Google Sheets unavailable (allows all dates)
+    res.send([]);
   }
 });
 
@@ -184,6 +239,62 @@ apiRouter.get('/appointments', async (req, res) => {
   } catch (error) {
     console.error('Error fetching appointments:', error);
     res.status(500).send({ msg: 'Error fetching appointments' });
+  }
+});
+
+// Force refresh from Google Sheets
+apiRouter.post('/sheets/refresh', async (req, res) => {
+  try {
+    console.log('🔄 Manual refresh requested...');
+    const appointments = await GoogleSheetsService.fetchBookedAppointments();
+    const availability = await GoogleSheetsService.fetchAvailableDates();
+    
+    res.send({
+      msg: 'Successfully refreshed from Google Sheets',
+      appointments: appointments.length,
+      availableDates: availability.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error refreshing from Google Sheets:', error);
+    res.status(500).send({ msg: 'Error refreshing from Google Sheets' });
+  }
+});
+
+// Get current sync status
+apiRouter.get('/sheets/status', (req, res) => {
+  const hasConfig = !!(process.env.GOOGLE_SHEETS_API_KEY && process.env.GOOGLE_SPREADSHEET_ID);
+  res.send({
+    configured: hasConfig,
+    polling: GoogleSheetsService.pollInterval !== null,
+    lastCheck: GoogleSheetsService.lastCheckTime,
+    spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID?.substring(0, 10) + '...'
+  });
+});
+
+// Sync database to Google Sheets (rebuild sheet from database)
+apiRouter.post('/sheets/sync-from-db', async (req, res) => {
+  try {
+    console.log('🔄 Database → Google Sheets sync requested...');
+    
+    // Get all appointments from database
+    const dbAppointments = await DB.getBookedAppointments();
+    
+    // Sync to Google Sheets
+    const result = await GoogleSheetsService.syncDatabaseToSheets(dbAppointments);
+    
+    if (result.success) {
+      res.send({
+        msg: result.message,
+        appointmentsSynced: result.count,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(500).send({ msg: result.message });
+    }
+  } catch (error) {
+    console.error('Error syncing database to Google Sheets:', error);
+    res.status(500).send({ msg: 'Error syncing database to Google Sheets' });
   }
 });
 
@@ -236,7 +347,13 @@ const httpService = app.listen(port, async () => {
   
   // Test Google Sheets connection on startup
   console.log('\n🔍 Testing Google Sheets integration...');
-  await GoogleSheetsService.testConnection();
+  const connectionWorking = await GoogleSheetsService.testConnection();
+  
+  // Start polling for changes if connection is working
+  if (connectionWorking) {
+    GoogleSheetsService.startPolling(60000); // Check every minute
+    console.log('🔄 Started auto-refresh from Google Sheets (every 60 seconds)');
+  }
 });
 
 peerProxy(httpService);

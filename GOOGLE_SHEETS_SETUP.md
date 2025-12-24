@@ -36,31 +36,41 @@ Example:
 | 12/17/2025 | NO        |
 ```
 
-### 2. Get Google Sheets API Key
+### 2. Get Google Sheets API Credentials (Service Account)
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create or select a project
 3. Enable the Google Sheets API
-4. Create credentials (API Key)
-5. Restrict the API key to Google Sheets API only
+4. **Create Service Account:**
+   - APIs & Services → Credentials
+   - Create Credentials → **Service Account**
+   - Give it a name like "scheduler-sheets"
+   - Click "Create and Continue"
+   - Skip role assignment → "Done"
+5. **Download JSON Key:**
+   - Click on your service account
+   - Keys tab → "Add Key" → "Create new key"
+   - Choose JSON format → Download
+6. **Copy the JSON file** to `service/google-credentials.json`
 
 ### 3. Configure Environment Variables
 1. Copy `service/.env.example` to `service/.env`
-2. Fill in your credentials:
+2. Update to use Service Account:
 ```
-GOOGLE_SHEETS_API_KEY=your_api_key_here
 GOOGLE_SPREADSHEET_ID=your_spreadsheet_id_here
+GOOGLE_SERVICE_ACCOUNT_PATH=./google-credentials.json
 ```
 
-### 4. Get Spreadsheet ID
+### 4. Share Sheet with Service Account
+1. Open the downloaded JSON file
+2. Copy the "client_email" value (looks like: name@project.iam.gserviceaccount.com)
+3. In your Google Sheet, click "Share"
+4. Add the service account email as **Editor**
+
+### 5. Get Spreadsheet ID
 From your Google Sheets URL:
 `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`
 
 Copy the `SPREADSHEET_ID` part.
-
-### 5. Make Sheet Public (Read-Only)
-1. Click "Share" in your Google Sheet
-2. Set to "Anyone with the link can view"
-3. This allows the API to read your sheet
 
 ## How It Works
 

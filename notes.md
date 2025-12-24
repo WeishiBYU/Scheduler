@@ -34,7 +34,7 @@ Todo
 
 []BackEnd export
 
-[]need to check all form in filled
+[]need to check all form in filled before submitting
 []Need a better looking mobile view
 []Add tracking
 []Redo pricing

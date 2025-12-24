@@ -12,9 +12,47 @@ const SchedulingForm  = () => {
     setSelectedDate,
     selectedTime,
     setSelectedTime,
-    getAvailableTimeSlots,
+    sheetsDataLoaded,
+    loadGoogleSheetsData,
+    fetchTimeSlotsForDate,
     isDateDisabled
   } = useBooking();
+
+  const [availableTimeSlots, setAvailableTimeSlots] = React.useState([]);
+  const [loadingTimeSlots, setLoadingTimeSlots] = React.useState(false);
+  const [loadingGoogleSheets, setLoadingGoogleSheets] = React.useState(false);
+
+  // Load Google Sheets data when component mounts (first time only)
+  React.useEffect(() => {
+    const initializeSchedulePage = async () => {
+      if (!sheetsDataLoaded) {
+        setLoadingGoogleSheets(true);
+        await loadGoogleSheetsData();
+        setLoadingGoogleSheets(false);
+      }
+    };
+    
+    initializeSchedulePage();
+  }, [sheetsDataLoaded, loadGoogleSheetsData]);
+
+  // Fetch time slots when date changes
+  React.useEffect(() => {
+    if (selectedDate) {
+      setLoadingTimeSlots(true);
+      fetchTimeSlotsForDate(selectedDate)
+        .then(slots => {
+          setAvailableTimeSlots(slots);
+          setLoadingTimeSlots(false);
+        })
+        .catch(error => {
+          console.error('Error fetching time slots:', error);
+          setAvailableTimeSlots([]);
+          setLoadingTimeSlots(false);
+        });
+    } else {
+      setAvailableTimeSlots([]);
+    }
+  }, [selectedDate, fetchTimeSlotsForDate]);
 
   const handleNext = () => {
     if (!selectedDate || !selectedTime) {
@@ -36,8 +74,6 @@ const SchedulingForm  = () => {
   const handleTimeSelect = (time) => {
     setSelectedTime(time);
   };
-
-  const availableTimeSlots = getAvailableTimeSlots(selectedDate);
   
   return (
     <div className="scheduling-form">
@@ -46,14 +82,18 @@ const SchedulingForm  = () => {
       
       <div className="calendar-container">
         <h3>Select Date</h3>
-        <Calendar
-          onChange={handleDateChange}
-          value={selectedDate}
-          tileDisabled={({ date }) => isDateDisabled(date)}
-          minDate={new Date()}
-          showNeighboringMonth={false}
-          className="booking-calendar"
-        />
+        {loadingGoogleSheets ? (
+          <p className="time-instruction">Loading available dates...</p>
+        ) : (
+          <Calendar
+            onChange={handleDateChange}
+            value={selectedDate}
+            tileDisabled={({ date }) => isDateDisabled(date)}
+            minDate={new Date()}
+            showNeighboringMonth={false}
+            className="booking-calendar"
+          />
+        )}
         {selectedDate && (
           <p className="selected-date">
             Selected: {selectedDate.toLocaleDateString('en-US', { 
@@ -70,6 +110,8 @@ const SchedulingForm  = () => {
         <h3>Available Times</h3>
         {!selectedDate ? (
           <p className="time-instruction">Please select a date first</p>
+        ) : loadingTimeSlots ? (
+          <p className="time-instruction">Loading time slots...</p>
         ) : availableTimeSlots.length === 0 ? (
           <p className="no-slots">No available time slots for this date</p>
         ) : (

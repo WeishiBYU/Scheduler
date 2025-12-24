@@ -48,19 +48,32 @@ export const BookingProvider = ({ children }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
 
-  // Available time slots
-  const timeSlots = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
+  // Available time slots (fetched from Google Sheets)
+  const [timeSlots, setTimeSlots] = useState([]);
+
+  // Available dates (fetched from Google Sheets)
+  const [availableDates, setAvailableDates] = useState([]);
+
+  // Cache for date-specific time slots
+  const [dateTimeSlotsCache, setDateTimeSlotsCache] = useState(new Map());
+
+  // Dates with time slot errors (should be grayed out)
+  const [datesWithErrors, setDatesWithErrors] = useState(new Set());
+
+  // Track if Google Sheets data has been loaded
+  const [sheetsDataLoaded, setSheetsDataLoaded] = useState(false);
 
   // Booked appointments (fetched from backend)
   const [bookedAppointments, setBookedAppointments] = useState([]);
 
-  // Fetch booked appointments on component mount
+  // Fetch booked appointments on component mount (lightweight)
   React.useEffect(() => {
-    const fetchBookedAppointments = async () => {
+    const fetchAppointments = async () => {
       try {
-        const response = await fetch('/api/appointments');
-        if (response.ok) {
-          const appointments = await response.json();
+        // Only fetch booked appointments initially
+        const appointmentsResponse = await fetch('/api/appointments');
+        if (appointmentsResponse.ok) {
+          const appointments = await appointmentsResponse.json();
           setBookedAppointments(appointments);
         } else {
           console.error('Failed to fetch appointments');
@@ -70,11 +83,12 @@ export const BookingProvider = ({ children }) => {
       }
     };
 
-    fetchBookedAppointments();
+    fetchAppointments();
   }, []);
 
   // Check if a date is available (not fully booked)
   const isDateAvailable = (date) => {
+    if (timeSlots.length === 0) return false; // No time slots available yet
     const dateString = date.toISOString().split('T')[0];
     const bookedSlotsForDate = bookedAppointments.filter(apt => apt.date === dateString);
     return bookedSlotsForDate.length < timeSlots.length; // Not all slots are booked
@@ -93,9 +107,127 @@ export const BookingProvider = ({ children }) => {
     return timeSlots.filter(time => isTimeSlotAvailable(date, time));
   };
 
+  // Load Google Sheets data (called only when schedule page opens)
+  const loadGoogleSheetsData = async () => {
+    if (sheetsDataLoaded) return; // Already loaded
+    
+    try {
+      console.log('🔄 Loading Google Sheets data for schedule page...');
+      
+      // Fetch available time slots from Google Sheets
+      const timeSlotsResponse = await fetch('/api/time-slots');
+      if (timeSlotsResponse.ok) {
+        const slots = await timeSlotsResponse.json();
+        setTimeSlots(slots);
+      } else {
+        console.error('Failed to fetch time slots');
+        setTimeSlots(['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM']);
+      }
+
+      // Fetch available dates from Google Sheets
+      const availableDatesResponse = await fetch('/api/available-dates');
+      if (availableDatesResponse.ok) {
+        const dates = await availableDatesResponse.json();
+        setAvailableDates(dates);
+      } else {
+        console.error('Failed to fetch available dates');
+        setAvailableDates([]);
+      }
+      
+      setSheetsDataLoaded(true);
+      console.log('✅ Google Sheets data loaded');
+    } catch (error) {
+      console.error('Error loading Google Sheets data:', error);
+      setTimeSlots(['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM']);
+      setAvailableDates([]);
+    }
+  };
+
+  // Fetch time slots for a specific date from Google Sheets (with caching)
+  // Fetch time slots for a specific date from Google Sheets (with caching)
+  const fetchTimeSlotsForDate = async (date) => {
+    if (!date) return [];
+    
+    const dateString = date.toISOString().split('T')[0];
+    
+    // Check cache first
+    if (dateTimeSlotsCache.has(dateString)) {
+      console.log(`📋 Using cached time slots for ${dateString}`);
+      return dateTimeSlotsCache.get(dateString);
+    }
+    
+    try {
+      const response = await fetch(`/api/time-slots/${dateString}`);
+      if (response.ok) {
+        const slots = await response.json();
+        
+        // Cache the result
+        setDateTimeSlotsCache(prev => new Map(prev).set(dateString, slots));
+        
+        // Remove date from error set if successful
+        setDatesWithErrors(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(dateString);
+          return newSet;
+        });
+        
+        return slots;
+      } else {
+        console.error('Failed to fetch time slots for date');
+        
+        // Add date to error set
+        setDatesWithErrors(prev => new Set(prev).add(dateString));
+        
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching time slots for date:', error);
+      
+      // Add date to error set
+      setDatesWithErrors(prev => new Set(prev).add(dateString));
+      
+      return [];
+    }
+  };
+
   // Add a new booked appointment to the state
   const addBookedAppointment = (appointment) => {
     setBookedAppointments(prev => [...prev, appointment]);
+  };
+
+  // Check and update fully booked dates in Google Sheets
+  const checkAndUpdateFullyBookedDates = async () => {
+    try {
+      console.log('🔍 Checking for fully booked dates...');
+      const response = await fetch('/api/availability/check-fully-booked', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('📊 Fully booked check results:', result);
+        
+        // Refresh available dates if any were updated
+        if (result.fullyBookedDatesUpdated > 0) {
+          const availableDatesResponse = await fetch('/api/available-dates');
+          if (availableDatesResponse.ok) {
+            const updatedDates = await availableDatesResponse.json();
+            setAvailableDates(updatedDates);
+          }
+        }
+        
+        return result;
+      } else {
+        console.error('Failed to check fully booked dates');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error checking fully booked dates:', error);
+      return null;
+    }
   };
 
   // Check if date should be disabled in calendar
@@ -109,7 +241,20 @@ export const BookingProvider = ({ children }) => {
     // Disable Sundays (assuming you don't work Sundays)
     if (date.getDay() === 0) return true;
     
-    // Disable if no available slots
+    const dateString = date.toISOString().split('T')[0];
+    
+    // Disable if there was an error fetching time slots for this date
+    if (datesWithErrors.has(dateString)) return true;
+    
+    // Check if date is in Google Sheets available dates
+    const isInAvailableDates = availableDates.includes(dateString);
+    
+    // If we have available dates from Google Sheets, only allow those dates
+    if (availableDates.length > 0 && !isInAvailableDates) {
+      return true;
+    }
+    
+    // Disable if no available slots (all time slots booked)
     if (!isDateAvailable(date)) return true;
     
     return false;
@@ -301,12 +446,18 @@ export const BookingProvider = ({ children }) => {
     selectedTime,
     setSelectedTime,
     timeSlots,
+    availableDates,
+    datesWithErrors,
+    sheetsDataLoaded,
+    loadGoogleSheetsData,
     isDateAvailable,
     isTimeSlotAvailable,
     getAvailableTimeSlots,
+    fetchTimeSlotsForDate,
     isDateDisabled,
     bookedAppointments,
-    addBookedAppointment
+    addBookedAppointment,
+    checkAndUpdateFullyBookedDates
   };
 
   return (
