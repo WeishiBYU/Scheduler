@@ -408,6 +408,112 @@ class GoogleSheetsService {
     }
   }
 
+  // Build a normalized row for Bookings sheet to keep columns consistent
+  buildBookingRow(bookingData, headers) {
+    const boolToText = (v) => (typeof v === 'boolean' ? (v ? 'Yes' : 'No') : (v || ''));
+
+    const formatItem = (item) => {
+      if (item === null || item === undefined) return '';
+      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+        return item.toString();
+      }
+      // Try common name/label/title keys for readability; otherwise JSON stringify
+      if (typeof item === 'object') {
+        const key = ['label', 'name', 'title', 'displayName', 'service', 'type'].find(k => item[k]);
+        if (key) return item[key];
+        return JSON.stringify(item);
+      }
+      return String(item);
+    };
+
+    const listToText = (v) => {
+      if (!v) return '';
+      if (Array.isArray(v)) {
+        return v.map(formatItem).filter(Boolean).join('; ');
+      }
+      return formatItem(v);
+    };
+
+    // If bookingData.services exists, split by category for carpet/upholstery columns
+    const services = Array.isArray(bookingData.services) ? bookingData.services : [];
+    const carpetServicesList = services
+      .filter(s => (s.category || '').toLowerCase() === 'carpet')
+      .map(s => formatItem(s.name || s));
+    const upholsteryServicesList = services
+      .filter(s => (s.category || '').toLowerCase() === 'upholstery')
+      .map(s => formatItem(s.name || s));
+
+    // Prefer explicit additionalInfo, otherwise fall back to customerInfo (where these live in UI payload)
+    const info = bookingData.additionalInfo || bookingData.customerInfo || {};
+
+    const presentForAppt = bookingData.presentForAppointment
+      ?? bookingData.presentForAppt
+      ?? bookingData.customerInfo?.presentForAppt
+      ?? info.presentForAppt
+      ?? '';
+
+    const paymentMethod = bookingData.paymentMethod
+      ?? bookingData.payment
+      ?? bookingData.customerInfo?.payment
+      ?? info.payment
+      ?? '';
+
+    const odorIssues = info.odorIssues
+      ?? bookingData.customerInfo?.odorIssues
+      ?? '';
+
+    const petUrineAreas = info.petUrineAreas
+      ?? bookingData.customerInfo?.petUrineAreas
+      ?? '';
+
+    const stains = info.stains
+      ?? bookingData.customerInfo?.stains
+      ?? '';
+
+    const specialInstructions = info.specialInstructions
+      ?? bookingData.customerInfo?.specialInstructions
+      ?? bookingData.customerInfo?.instructions
+      ?? '';
+
+    const generalInstructions = info.generalInstructions
+      ?? bookingData.customerInfo?.generalInstructions
+      ?? '';
+
+    // Map values to header positions so user can reorder columns without breaking
+    const normalizedHeaders = headers.map(h => (h || '').trim().toLowerCase());
+    const row = new Array(headers.length).fill('');
+
+    const setIfExists = (headerLabel, value) => {
+      const idx = normalizedHeaders.indexOf(headerLabel.trim().toLowerCase());
+      if (idx !== -1) {
+        row[idx] = value;
+      }
+    };
+
+    setIfExists('timestamp', new Date().toISOString());
+    setIfExists('first name', bookingData.customerInfo?.firstName || '');
+    setIfExists('last name', bookingData.customerInfo?.lastName || '');
+    setIfExists('email', bookingData.customerInfo?.email || '');
+    setIfExists('phone', bookingData.customerInfo?.phone || '');
+    setIfExists('address', bookingData.customerInfo?.address || '');
+    setIfExists('date', bookingData.selectedDate || '');
+    setIfExists('time', bookingData.selectedTime || '');
+    setIfExists('carpet services', listToText(carpetServicesList.length ? carpetServicesList : bookingData.carpetServices));
+    setIfExists('upholstery services', listToText(upholsteryServicesList.length ? upholsteryServicesList : bookingData.upholsteryServices));
+    setIfExists('additional services', listToText(bookingData.additionalServices || info.additionalServices));
+    setIfExists('total price', bookingData.totalPrice || '');
+    setIfExists('payment method', paymentMethod);
+    setIfExists('present for appt', boolToText(presentForAppt));
+    setIfExists('pre-vacuum', boolToText(info.preVacuum));
+    setIfExists('odor issues', odorIssues);
+    setIfExists('pet urine areas', petUrineAreas);
+    setIfExists('stains', stains);
+    setIfExists('special instructions', specialInstructions);
+    setIfExists('general instructions', generalInstructions);
+
+    return row;
+  }
+
   // Add booking details to Bookings sheet
   async addBookingDetails(bookingData) {
     try {
@@ -416,31 +522,16 @@ class GoogleSheetsService {
         return { success: false, message: 'Google Sheets not configured' };
       }
 
+      // Read existing headers so we place values in the correct columns without altering headers
+      const headerRow = await this.getBookingsHeaders();
+      if (!headerRow || headerRow.length === 0) {
+        return { success: false, message: 'Bookings sheet headers not found. Please add a header row first.' };
+      }
+
       console.log('📝 Adding booking details to Bookings sheet...');
 
       // Prepare the row data with all booking information
-      const rowData = [
-        new Date().toISOString(), // Timestamp
-        bookingData.customerInfo?.firstName || '',
-        bookingData.customerInfo?.lastName || '',
-        bookingData.customerInfo?.email || '',
-        bookingData.customerInfo?.phone || '',
-        bookingData.customerInfo?.address || '',
-        bookingData.selectedDate || '',
-        bookingData.selectedTime || '',
-        Array.isArray(bookingData.carpetServices) ? bookingData.carpetServices.join(', ') : '',
-        Array.isArray(bookingData.upholsteryServices) ? bookingData.upholsteryServices.join(', ') : '',
-        Array.isArray(bookingData.additionalServices) ? bookingData.additionalServices.join(', ') : '',
-        bookingData.totalPrice || '',
-        bookingData.paymentMethod || '',
-        bookingData.presentForAppointment || '',
-        bookingData.additionalInfo?.preVacuum || '',
-        bookingData.additionalInfo?.odorIssues || '',
-        bookingData.additionalInfo?.petUrineAreas || '',
-        bookingData.additionalInfo?.stains || '',
-        bookingData.additionalInfo?.specialInstructions || '',
-        bookingData.additionalInfo?.generalInstructions || ''
-      ];
+      const rowData = this.buildBookingRow(bookingData, headerRow);
 
       // Append the row to the Bookings sheet
       await this.sheets.spreadsheets.values.append({
@@ -461,51 +552,23 @@ class GoogleSheetsService {
     }
   }
 
-  // Initialize Bookings sheet with headers (call this once to set up the sheet)
-  async initializeBookingsSheet() {
+  // Read Bookings header row without modifying it
+  async getBookingsHeaders() {
     try {
       if (!this.sheets || !GOOGLE_SHEETS_CONFIG.spreadsheetId) {
         console.log('🔧 Google Sheets not configured');
-        return { success: false, message: 'Google Sheets not configured' };
+        return null;
       }
 
-      const headers = [
-        'Timestamp',
-        'First Name',
-        'Last Name',
-        'Email',
-        'Phone',
-        'Address',
-        'Date',
-        'Time',
-        'Carpet Services',
-        'Upholstery Services',
-        'Additional Services',
-        'Total Price',
-        'Payment Method',
-        'Present for Appt',
-        'Pre-Vacuum',
-        'Odor Issues',
-        'Pet Urine Areas',
-        'Stains',
-        'Special Instructions',
-        'General Instructions'
-      ];
-
-      await this.sheets.spreadsheets.values.update({
+      const resp = await this.sheets.spreadsheets.values.get({
         spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
-        range: 'Bookings!A1:T1',
-        valueInputOption: 'RAW',
-        resource: {
-          values: [headers]
-        }
+        range: 'Bookings!1:1'
       });
 
-      console.log('✅ Bookings sheet initialized with headers');
-      return { success: true, message: 'Headers created' };
+      return (resp.data.values && resp.data.values[0]) || [];
     } catch (error) {
-      console.error('❌ Error initializing Bookings sheet:', error.message);
-      return { success: false, message: error.message };
+      console.error('❌ Error reading Bookings headers:', error.message);
+      return null;
     }
   }
 
