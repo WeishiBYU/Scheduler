@@ -126,32 +126,21 @@ apiRouter.post('/booking', async (req, res) => {
     // Add to database
     const result = await DB.addBooking(booking);
     
-    // Get current time slots for availability checking
-    const timeSlots = await GoogleSheetsService.fetchTimeSlots();
-    const allAppointments = await DB.getBookedAppointments();
-    
-    // Add to Google Sheets and check/update availability
-    const appointment = {
-      selectedDate: booking.selectedDate,
-      selectedTime: booking.selectedTime
-    };
-    
-    const sheetResult = await GoogleSheetsService.addAppointmentAndUpdateAvailability(
-      appointment, 
-      timeSlots, 
-      [...allAppointments, appointment]
+    // Book the time slot in Google Sheets
+    const sheetResult = await GoogleSheetsService.bookTimeSlot(
+      booking.selectedDate,
+      booking.selectedTime
     );
     
     console.log('✅ Booking processing completed:', {
       databaseSaved: !!result.insertedId,
-      sheetUpdated: sheetResult.appointmentAdded,
-      availabilityChecked: sheetResult.availabilityUpdated
+      sheetUpdated: sheetResult.success
     });
     
     res.status(201).send({ 
       msg: 'Booking created successfully', 
       bookingId: result.insertedId,
-      availabilityStatus: sheetResult.message
+      googleSheetsStatus: sheetResult.message
     });
   } catch (error) {
     console.error('Error creating booking:', error);
