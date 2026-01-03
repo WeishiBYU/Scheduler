@@ -8,6 +8,7 @@ const GOOGLE_SHEETS_CONFIG = {
   apiKey: process.env.GOOGLE_SHEETS_API_KEY,
   serviceAccountPath: process.env.GOOGLE_SERVICE_ACCOUNT_PATH || './google-credentials.json',
   scheduleRange: 'Schedule!A:Z', // Single sheet with dates and time slots
+  bookingsRange: 'Bookings!A:Z', // Booking details sheet
 };
 
 class GoogleSheetsService {
@@ -404,6 +405,107 @@ class GoogleSheetsService {
     } catch (error) {
       console.error('❌ Error parsing date:', dateStr, error.message);
       return null;
+    }
+  }
+
+  // Add booking details to Bookings sheet
+  async addBookingDetails(bookingData) {
+    try {
+      if (!this.sheets || !GOOGLE_SHEETS_CONFIG.spreadsheetId) {
+        console.log('🔧 Google Sheets not configured for writing');
+        return { success: false, message: 'Google Sheets not configured' };
+      }
+
+      console.log('📝 Adding booking details to Bookings sheet...');
+
+      // Prepare the row data with all booking information
+      const rowData = [
+        new Date().toISOString(), // Timestamp
+        bookingData.customerInfo?.firstName || '',
+        bookingData.customerInfo?.lastName || '',
+        bookingData.customerInfo?.email || '',
+        bookingData.customerInfo?.phone || '',
+        bookingData.customerInfo?.address || '',
+        bookingData.selectedDate || '',
+        bookingData.selectedTime || '',
+        Array.isArray(bookingData.carpetServices) ? bookingData.carpetServices.join(', ') : '',
+        Array.isArray(bookingData.upholsteryServices) ? bookingData.upholsteryServices.join(', ') : '',
+        Array.isArray(bookingData.additionalServices) ? bookingData.additionalServices.join(', ') : '',
+        bookingData.totalPrice || '',
+        bookingData.paymentMethod || '',
+        bookingData.presentForAppointment || '',
+        bookingData.additionalInfo?.preVacuum || '',
+        bookingData.additionalInfo?.odorIssues || '',
+        bookingData.additionalInfo?.petUrineAreas || '',
+        bookingData.additionalInfo?.stains || '',
+        bookingData.additionalInfo?.specialInstructions || '',
+        bookingData.additionalInfo?.generalInstructions || ''
+      ];
+
+      // Append the row to the Bookings sheet
+      await this.sheets.spreadsheets.values.append({
+        spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+        range: GOOGLE_SHEETS_CONFIG.bookingsRange,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        resource: {
+          values: [rowData]
+        }
+      });
+
+      console.log('✅ Successfully added booking details to Bookings sheet');
+      return { success: true, message: 'Booking details saved to sheet' };
+    } catch (error) {
+      console.error('❌ Error adding booking details:', error.message);
+      return { success: false, message: error.message };
+    }
+  }
+
+  // Initialize Bookings sheet with headers (call this once to set up the sheet)
+  async initializeBookingsSheet() {
+    try {
+      if (!this.sheets || !GOOGLE_SHEETS_CONFIG.spreadsheetId) {
+        console.log('🔧 Google Sheets not configured');
+        return { success: false, message: 'Google Sheets not configured' };
+      }
+
+      const headers = [
+        'Timestamp',
+        'First Name',
+        'Last Name',
+        'Email',
+        'Phone',
+        'Address',
+        'Date',
+        'Time',
+        'Carpet Services',
+        'Upholstery Services',
+        'Additional Services',
+        'Total Price',
+        'Payment Method',
+        'Present for Appt',
+        'Pre-Vacuum',
+        'Odor Issues',
+        'Pet Urine Areas',
+        'Stains',
+        'Special Instructions',
+        'General Instructions'
+      ];
+
+      await this.sheets.spreadsheets.values.update({
+        spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
+        range: 'Bookings!A1:T1',
+        valueInputOption: 'RAW',
+        resource: {
+          values: [headers]
+        }
+      });
+
+      console.log('✅ Bookings sheet initialized with headers');
+      return { success: true, message: 'Headers created' };
+    } catch (error) {
+      console.error('❌ Error initializing Bookings sheet:', error.message);
+      return { success: false, message: error.message };
     }
   }
 
