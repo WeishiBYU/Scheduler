@@ -6,6 +6,7 @@ const path = require('path');
 // Google Sheets configuration
 const GOOGLE_SHEETS_CONFIG = {
   spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
+  apiKey: process.env.GOOGLE_SHEETS_API_KEY,
   serviceAccountPath: process.env.GOOGLE_SERVICE_ACCOUNT_PATH || './google-credentials.json',
   appointmentsRange: 'Appointments!A:C',
   availabilityRange: 'Availability!A:Z', // Extended range to capture all columns
@@ -28,10 +29,22 @@ class GoogleSheetsService {
         return;
       }
 
+      // Try API key authentication first (simpler, read-only)
+      if (GOOGLE_SHEETS_CONFIG.apiKey) {
+        this.sheets = google.sheets({ 
+          version: 'v4', 
+          auth: GOOGLE_SHEETS_CONFIG.apiKey 
+        });
+        console.log('✅ Google Sheets initialized with API key (read-only mode)');
+        return;
+      }
+
+      // Fall back to service account authentication (read/write)
       const credentialsPath = path.resolve(GOOGLE_SHEETS_CONFIG.serviceAccountPath);
       
       if (!fs.existsSync(credentialsPath)) {
         console.log('🔧 Service account file not found:', credentialsPath);
+        console.log('💡 For read/write access, provide google-credentials.json');
         return;
       }
 
@@ -43,7 +56,7 @@ class GoogleSheetsService {
       });
 
       this.sheets = google.sheets({ version: 'v4', auth });
-      console.log('✅ Google Sheets authentication initialized');
+      console.log('✅ Google Sheets authentication initialized with service account');
     } catch (error) {
       console.error('❌ Error initializing Google Sheets auth:', error.message);
     }
@@ -392,12 +405,17 @@ class GoogleSheetsService {
   // Format date from Google Sheets to YYYY-MM-DD
   formatDate(dateStr) {
     try {
+      // Skip empty or invalid values
+      if (!dateStr || dateStr.trim() === '' || dateStr === 'Date') {
+        return null;
+      }
+      
       let date;
       
       if (dateStr.includes('/')) {
         // Format: MM/DD/YYYY
         const [month, day, year] = dateStr.split('/');
-        date = new Date(year, month - 1, day);
+        date = new Date(year, parseInt(month) - 1, day);
       } else if (dateStr.includes('-')) {
         // Format: YYYY-MM-DD
         date = new Date(dateStr);
@@ -405,9 +423,15 @@ class GoogleSheetsService {
         date = new Date(dateStr);
       }
       
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn('⚠️  Invalid date value:', dateStr);
+        return null;
+      }
+      
       return date.toISOString().split('T')[0];
     } catch (error) {
-      console.error('Error parsing date:', dateStr, error);
+      console.error('❌ Error parsing date:', dateStr, error.message);
       return null;
     }
   }

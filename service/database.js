@@ -1,9 +1,12 @@
 const { MongoClient } = require('mongodb');
-const config = require('./dbConfig.json');
+require('dotenv').config();
 
-const url = `mongodb+srv://${config.userName}:${config.password}@${config.hostname}`;
-const client = new MongoClient(url);
-const db = client.db('scheduler');
+// Use environment variables or fallback to local MongoDB
+const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017';
+const dbName = process.env.DB_NAME || 'scheduler';
+
+const client = new MongoClient(mongoUrl);
+const db = client.db(dbName);
 const userCollection = db.collection('user');
 const bookingCollection = db.collection('booking');
 
@@ -11,10 +14,11 @@ const bookingCollection = db.collection('booking');
 (async function testConnection() {
   try {
     await db.command({ ping: 1 });
-    console.log(`Connect to database`);
+    console.log(`✅ Connected to database: ${dbName}`);
   } catch (ex) {
-    console.log(`Unable to connect to database with ${url} because ${ex.message}`);
-    process.exit(1);
+    console.log(`⚠️  Unable to connect to database with ${mongoUrl} because ${ex.message}`);
+    console.log('📝 The service will continue but database operations will fail.');
+    console.log('💡 To fix: Set MONGODB_URL in your .env file or install MongoDB locally.');
   }
 })();
 

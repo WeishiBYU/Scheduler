@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../../contexts/BookingContext';
+import { serviceConfig } from '../../config/serviceConfig';
 import './QuoteForm.css';
 
 const QuoteForm = () => {
   const navigate = useNavigate();
-  const [openAccordions, setOpenAccordions] = useState({
-    carpet: true,
-    upholstery: true
-  });
+  const [openAccordions, setOpenAccordions] = useState(() =>
+    Object.keys(serviceConfig).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: true
+      }),
+      {}
+    )
+  );
   const { 
     carpetServices, 
     setCarpetServices, 
     upholsteryServices, 
     setUpholsteryServices 
   } = useBooking();
+
+  const serviceState = {
+    carpet: { services: carpetServices, setServices: setCarpetServices },
+    upholstery: { services: upholsteryServices, setServices: setUpholsteryServices }
+  };
 
   const handleNext = () => {
     navigate('/additional-info');
@@ -27,42 +38,16 @@ const QuoteForm = () => {
     }));
   };
 
-  const handleCarpetServiceChange = (area, serviceType, value) => {
+  const handleQuantityChange = (categoryKey, itemKey, value) => {
     const numValue = Math.max(0, parseInt(value) || 0);
-    setCarpetServices(prev => ({
+    const setServices = serviceState[categoryKey].setServices;
+    setServices(prev => ({
       ...prev,
-      [area]: {
-        ...prev[area],
-        [serviceType]: numValue
+      [itemKey]: {
+        ...prev[itemKey],
+        cleaned: numValue
       }
     }));
-  };
-
-  const handleUpholsteryServiceChange = (furniture, serviceType, value) => {
-    const numValue = Math.max(0, parseInt(value) || 0);
-    setUpholsteryServices(prev => ({
-      ...prev,
-      [furniture]: {
-        ...prev[furniture],
-        [serviceType]: numValue
-      }
-    }));
-  };
-
-  // ...existing code for labels and JSX remains the same...
-  const areaLabels = {
-    rooms: 'Rooms',
-    halls: 'Halls',
-    staircases: 'Staircases',
-    walkInClosets: 'Walk-in Closets',
-    landings: 'Landings'
-  };
-
-  const furnitureLabels = {
-    sofas: 'Sofas',
-    sectionals: 'Sectionals (per seat)',
-    loveSeats: 'Love Seats',
-    chairs: 'Chairs'
   };
 
   return (
@@ -71,105 +56,66 @@ const QuoteForm = () => {
       <p>Select the services you need:</p>
       
       <div className="service-accordions">
-        {/* Carpet Cleaning Accordion */}
-        <div className="accordion-item">
-          <div 
-            className={`accordion-header ${openAccordions.carpet ? 'active' : ''}`}
-            onClick={() => toggleAccordion('carpet')}
-          >
-            <h3>Carpet Cleaning</h3>
-            <span className="accordion-icon">{openAccordions.carpet ? '−' : '+'}</span>
-          </div>
-          
-          <div className={`accordion-content ${openAccordions.carpet ? 'open' : 'closed'}`}>
-            <p>Select areas and services for carpet cleaning:</p>
-            
-            <div className="carpet-services-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Area</th>
-                    <th>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.keys(carpetServices).map((area) => (
-                    <tr key={area}>
-                      <td className="area-label">{areaLabels[area]}</td>
-                      <td>
-                            <button 
-                              onClick={() => handleCarpetServiceChange(area, 'cleaned', carpetServices[area].cleaned - 1)}
-                              className="quantity-btn"
-                            >−</button>
-                        <input
-                          type="number"
-                          min="0"
-                          value={carpetServices[area].cleaned}
-                          onChange={(e) => handleCarpetServiceChange(area, 'cleaned', e.target.value)}
-                          className="quantity-input"
-                        />
-                            <button 
-                              onClick={() => handleCarpetServiceChange(area, 'cleaned', carpetServices[area].cleaned + 1)}
-                              className="quantity-btn"
-                            >+</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        {Object.entries(serviceConfig).map(([categoryKey, category]) => {
+          const { services } = serviceState[categoryKey];
+          return (
+            <div className="accordion-item" key={categoryKey}>
+              <div
+                className={`accordion-header ${openAccordions[categoryKey] ? 'active' : ''}`}
+                onClick={() => toggleAccordion(categoryKey)}
+              >
+                <h3>{category.title}</h3>
+                <span className="accordion-icon">{openAccordions[categoryKey] ? '−' : '+'}</span>
+              </div>
 
-        {/* Upholstery Cleaning Accordion */}
-        <div className="accordion-item">
-          <div 
-            className={`accordion-header ${openAccordions.upholstery ? 'active' : ''}`}
-            onClick={() => toggleAccordion('upholstery')}
-          >
-            <h3>Upholstery Cleaning</h3>
-            <span className="accordion-icon">{openAccordions.upholstery ? '−' : '+'}</span>
-          </div>
-          
-          <div className={`accordion-content ${openAccordions.upholstery ? 'open' : 'closed'}`}>
-            <p>Select furniture and services for upholstery cleaning:</p>
-            
-            <div className="upholstery-services-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Furniture Type</th>
-                    <th>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.keys(upholsteryServices).map((furniture) => (
-                    <tr key={furniture}>
-                      <td className="furniture-label">{furnitureLabels[furniture]}</td>
-                      <td>
-                          <button 
-                              onClick={() => handleUpholsteryServiceChange(furniture, 'cleaned', upholsteryServices[furniture].cleaned - 1)}
-                              className="quantity-btn"
-                            >-</button>
-                        <input
-                          type="number"
-                          min="0"
-                          value={upholsteryServices[furniture].cleaned}
-                          onChange={(e) => handleUpholsteryServiceChange(furniture, 'cleaned', e.target.value)}
-                          className="quantity-input"
-                        />
-                          <button 
-                              onClick={() => handleUpholsteryServiceChange(furniture, 'cleaned', upholsteryServices[furniture].cleaned + 1)}
-                              className="quantity-btn"
-                            >+</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className={`accordion-content ${openAccordions[categoryKey] ? 'open' : 'closed'}`}>
+                <p>{category.description}</p>
+
+                <div className={`${categoryKey}-services-table`}>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>{categoryKey === 'carpet' ? 'Area' : 'Furniture Type'}</th>
+                        <th>Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {category.items.map((item) => {
+                        const quantity = services[item.key]?.cleaned ?? 0;
+                        return (
+                          <tr key={item.key}>
+                            <td className="area-label">{item.label}</td>
+                            <td>
+                              <button
+                                onClick={() => handleQuantityChange(categoryKey, item.key, quantity - 1)}
+                                className="quantity-btn"
+                              >
+                                −
+                              </button>
+                              <input
+                                type="number"
+                                min="0"
+                                value={quantity}
+                                onChange={(e) => handleQuantityChange(categoryKey, item.key, e.target.value)}
+                                className="quantity-input"
+                              />
+                              <button
+                                onClick={() => handleQuantityChange(categoryKey, item.key, quantity + 1)}
+                                className="quantity-btn"
+                              >
+                                +
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
       
       <div className="form-navigation">

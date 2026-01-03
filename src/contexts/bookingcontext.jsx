@@ -1,6 +1,38 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { serviceConfig, additionalServicesConfig, calculateAdditionalServicePrice, getAdditionalServiceDisplay } from '../config/serviceConfig';
 
 const BookingContext = createContext();
+
+const buildInitialServiceState = (categoryKey) =>
+  serviceConfig[categoryKey].items.reduce(
+    (acc, { key }) => ({
+      ...acc,
+      [key]: { cleaned: 0 }
+    }),
+    {}
+  );
+
+const buildPricingMap = (categoryKey) =>
+  serviceConfig[categoryKey].items.reduce(
+    (acc, { key, price }) => ({
+      ...acc,
+      [key]: price
+    }),
+    {}
+  );
+
+const serviceLabels = Object.fromEntries(
+  Object.entries(serviceConfig).map(([categoryKey, category]) => [
+    categoryKey,
+    category.items.reduce(
+      (acc, { key, label }) => ({
+        ...acc,
+        [key]: label
+      }),
+      {}
+    )
+  ])
+);
 
 export const useBooking = () => {
   const context = useContext(BookingContext);
@@ -11,20 +43,9 @@ export const useBooking = () => {
 };
 
 export const BookingProvider = ({ children }) => {
-  const [carpetServices, setCarpetServices] = useState({
-    rooms: { cleaned: 0 },
-    halls: { cleaned: 0 },
-    staircases: { cleaned: 0 },
-    walkInClosets: { cleaned: 0 },
-    landings: { cleaned: 0 }
-  });
+  const [carpetServices, setCarpetServices] = useState(() => buildInitialServiceState('carpet'));
   
-  const [upholsteryServices, setUpholsteryServices] = useState({
-    sofas: { cleaned: 0 },
-    sectionals: { cleaned: 0 },
-    loveSeats: { cleaned: 0 },
-    chairs: { cleaned: 0 }
-  });
+  const [upholsteryServices, setUpholsteryServices] = useState(() => buildInitialServiceState('upholstery'));
 
   // Customer information state
   const [customerInfo, setCustomerInfo] = useState({
@@ -262,19 +283,8 @@ export const BookingProvider = ({ children }) => {
 
   // Define pricing structure
   const pricing = {
-    carpet: {
-      rooms: 45,
-      halls: 25,
-      staircases: 35,
-      walkInClosets: 20,
-      landings: 15
-    },
-    upholstery: {
-      sofas: 85,
-      sectionals: 25, // per seat
-      loveSeats: 65,
-      chairs: 35
-    }
+    carpet: buildPricingMap('carpet'),
+    upholstery: buildPricingMap('upholstery')
   };
 
   const getSelectedServices = () => {
@@ -283,16 +293,8 @@ export const BookingProvider = ({ children }) => {
     // Add carpet services
     Object.entries(carpetServices).forEach(([area, service]) => {
       if (service.cleaned > 0) {
-        const areaLabels = {
-          rooms: 'Rooms',
-          halls: 'Halls',
-          staircases: 'Staircases',
-          walkInClosets: 'Walk-in Closets',
-          landings: 'Landings'
-        };
-        
         services.push({
-          name: `${areaLabels[area]} (${service.cleaned})`,
+          name: `${serviceLabels.carpet[area]} (${service.cleaned})`,
           price: pricing.carpet[area] * service.cleaned,
           category: 'carpet'
         });
@@ -302,15 +304,8 @@ export const BookingProvider = ({ children }) => {
     // Add upholstery services
     Object.entries(upholsteryServices).forEach(([furniture, service]) => {
       if (service.cleaned > 0) {
-        const furnitureLabels = {
-          sofas: 'Sofas',
-          sectionals: 'Sectionals',
-          loveSeats: 'Love Seats',
-          chairs: 'Chairs'
-        };
-        
         services.push({
-          name: `${furnitureLabels[furniture]} (${service.cleaned})`,
+          name: `${serviceLabels.upholstery[furniture]} (${service.cleaned})`,
           price: pricing.upholstery[furniture] * service.cleaned,
           category: 'upholstery'
         });
@@ -323,93 +318,22 @@ export const BookingProvider = ({ children }) => {
   const getAdditionalServicesDetails = () => {
     const services = [];
     
-    // Pre-vacuum pricing (needs to be calculated based on selected rooms)
-    if (customerInfo.preVacuum === 'pros-vacuum') {
-      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
-      const totalHalls = carpetServices.halls.cleaned + carpetServices.landings.cleaned;
-      const totalStaircases = carpetServices.staircases.cleaned;
+    // Iterate through each additional service configuration
+    Object.keys(additionalServicesConfig).forEach(serviceKey => {
+      const selectedValue = customerInfo[serviceKey];
+      if (!selectedValue) return;
       
-      const cost = (totalRooms * 10) + (totalHalls * 5) + (totalStaircases * 20);
-      if (cost > 0) {
+      const display = getAdditionalServiceDisplay(serviceKey, selectedValue, carpetServices);
+      
+      // Only add if there's a displayName (meaning it has a cost)
+      if (display && display.name && display.price > 0) {
         services.push({
-          name: 'Pre-Vacuum Service',
-          price: cost
+          name: display.name,
+          price: display.price,
+          note: display.note
         });
       }
-    }
-    
-    // Odor treatment pricing
-    if (customerInfo.odorIssues === 'mild-odor') {
-      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
-      let cost = 0;
-      if (totalRooms <= 2) {
-        cost = 25;
-      } else {
-        cost = 25 + ((totalRooms - 2) * 10);
-      }
-      services.push({
-        name: 'Odor Treatment (Mild)',
-        price: cost
-      });
-    } else if (customerInfo.odorIssues === 'heavy-odor') {
-      const totalRooms = carpetServices.rooms.cleaned + carpetServices.walkInClosets.cleaned;
-      let cost = 0;
-      if (totalRooms <= 2) {
-        cost = 50;
-      } else {
-        cost = 50 + ((totalRooms - 2) * 30);
-      }
-      services.push({
-        name: 'Odor Treatment (Heavy)',
-        price: cost
-      });
-    }
-    
-    // Pet urine areas pricing
-    if (customerInfo.petUrineAreas === '3-or-less-spots') {
-      services.push({
-        name: 'Pet Urine Areas (3 or less spots)',
-        price: 75
-      });
-    } else if (customerInfo.petUrineAreas === '1-room') {
-      services.push({
-        name: 'Pet Urine Areas (1 room)',
-        price: 50
-      });
-    } else if (customerInfo.petUrineAreas === '2-rooms') {
-      services.push({
-        name: 'Pet Urine Areas (2 rooms)',
-        price: 100
-      });
-    } else if (customerInfo.petUrineAreas === '3-rooms') {
-      services.push({
-        name: 'Pet Urine Areas (3 rooms)',
-        price: 150
-      });
-    } else if (customerInfo.petUrineAreas === '4-rooms') {
-      services.push({
-        name: 'Urine Areas (4 rooms)',
-        price: 200
-      });
-    }
-    
-    // Stain treatment pricing
-    if (customerInfo.stains === '1-3-stains') {
-      services.push({
-        name: 'Stain Treatment (1-3)',
-        price: 30
-      });
-    } else if (customerInfo.stains === '4-6-stains') {
-      services.push({
-        name: 'Stain Treatment (4-6)',
-        price: 60
-      });
-    } else if (customerInfo.stains === '7-9-stains') {
-      services.push({
-        name: 'Stain Treatment (7-9)',
-        price: 80
-      });
-    }
+    });
     
     return services;
   };
