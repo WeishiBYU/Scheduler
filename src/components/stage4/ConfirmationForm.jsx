@@ -20,6 +20,37 @@ const ConfirmationForm = () => {
   const totalPrice = calculateTotalPrice();
 
   const handleSubmit = async () => {
+    // Validate all required fields
+    const missingFields = [];
+
+    // Check customer information
+    if (!customerInfo.firstName?.trim()) missingFields.push('First Name');
+    if (!customerInfo.lastName?.trim()) missingFields.push('Last Name');
+    if (!customerInfo.email?.trim()) missingFields.push('Email');
+    if (!customerInfo.phone?.trim()) missingFields.push('Phone');
+    if (!customerInfo.address?.trim()) missingFields.push('Address');
+    if (!customerInfo.presentForAppt) missingFields.push('Appointment Attendance');
+    if (!customerInfo.payment) missingFields.push('Payment Method');
+
+    // Check additional info fields
+    if (!customerInfo.preVacuum) missingFields.push('Pre-Vacuum Preference');
+    if (!customerInfo.odorIssues) missingFields.push('Odor Treatment Selection');
+    if (!customerInfo.petUrineAreas) missingFields.push('Pet Urine Areas Selection');
+    if (!customerInfo.stains) missingFields.push('Stain Treatment Selection');
+
+    // Check services
+    if (selectedServices.length === 0) missingFields.push('At least one service');
+
+    // Check date and time
+    if (!selectedDate) missingFields.push('Appointment Date');
+    if (!selectedTime) missingFields.push('Appointment Time');
+
+    // If there are missing fields, show alert and don't proceed
+    if (missingFields.length > 0) {
+      alert(`Please complete the following required fields:\n\n• ${missingFields.join('\n• ')}`);
+      return;
+    }
+
     try {
       const bookingData = {
         services: selectedServices,
@@ -51,9 +82,10 @@ const ConfirmationForm = () => {
           });
         }
         
-        alert('Booking confirmed! You will receive a confirmation email shortly.');
         console.log('Booking created successfully:', result);
-        // Optionally redirect to a success page or reset the form
+        
+        // Navigate to thank you page
+        navigate('/thank-you');
       } else {
         const error = await response.json();
         alert(`Error creating booking: ${error.msg || 'Unknown error'}`);

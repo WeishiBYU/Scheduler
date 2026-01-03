@@ -7,6 +7,7 @@ import AdditionalInfoForm from './components/stage1.5/AdditionalInfoForm';
 import InformationForm from './components/stage2/InformationForm';
 import SchedulingForm from './components/stage3/SchedulingForm';
 import ConfirmationForm from './components/stage4/ConfirmationForm';
+import ThankYou from './components/thankyou/ThankYou';
 import { Login, Profile } from './components/login/Login';
 import Chat from './components/chat/chat.jsx';
 import { ChatClient } from './components/chat/Notifer.js';
@@ -24,6 +25,7 @@ function App() {
             <Route path="/information" element={<InformationForm />} />
             <Route path="/schedule" element={<SchedulingForm />} />
             <Route path="/confirmation" element={<ConfirmationForm />} />
+            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/chat" element={<Chat webSocket={new ChatClient()} />} />
